@@ -25,11 +25,11 @@ const Navbar = () => {
                             <Link to="/" className="text-gray-900 dark:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-primary dark:hover:text-white text-sm font-medium">
                                 Dashboard
                             </Link>
-                            <Link to="/bookings" className="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium">
+                            <Link to="/bookings" className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium">
                                 My Bookings
                             </Link>
                             {user && (user.role === 'super_admin' || user.role === 'studio_admin') && (
-                                <Link to="/admin" className="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium">
+                                <Link to="/admin" className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium">
                                     Admin
                                 </Link>
                             )}

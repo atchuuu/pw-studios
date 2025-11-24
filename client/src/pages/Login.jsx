@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import pwLogo from '../assets/pw-logo.png';
-import ThemeToggle from '../components/ThemeToggle';
+
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -27,19 +27,16 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
-            <div className="absolute top-4 right-4">
-                <ThemeToggle />
-            </div>
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-2xl relative transition-colors duration-200">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+            <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-2xl relative transition-colors duration-200">
                 <div>
                     <div className="flex flex-col items-center">
                         <img src={pwLogo} alt="PW Logo" className="h-24 w-auto mb-4" />
-                        <h2 className="mt-2 text-center text-4xl font-extrabold text-gray-900 tracking-tight">
+                        <h2 className="mt-2 text-center text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                             PW Studios
                         </h2>
                     </div>
-                    <p className="mt-2 text-center text-sm text-gray-600">
+                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
                         Welcome back! Please sign in to continue.
                     </p>
                 </div>
@@ -60,7 +57,7 @@ const Login = () => {
                     )}
                     <div className="space-y-5">
                         <div>
-                            <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Email address
                             </label>
                             <input
@@ -69,14 +66,14 @@ const Login = () => {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out sm:text-sm"
+                                className="appearance-none block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out sm:text-sm"
                                 placeholder="you@pw.live"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Password
                             </label>
                             <div className="relative">
@@ -86,7 +83,7 @@ const Login = () => {
                                     type={showPassword ? "text" : "password"}
                                     autoComplete="current-password"
                                     required
-                                    className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out sm:text-sm pr-10"
+                                    className="appearance-none block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out sm:text-sm pr-10"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -123,19 +120,19 @@ const Login = () => {
                                 <div className="w-full border-t border-gray-200" />
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-white text-gray-500">Demo Credentials</span>
+                                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Demo Credentials</span>
                             </div>
                         </div>
                         <div className="mt-6 grid grid-cols-2 gap-3">
-                            <div className="text-center p-2 bg-gray-50 rounded-lg border border-gray-100">
-                                <p className="text-xs font-semibold text-gray-500 uppercase">Faculty</p>
-                                <p className="text-xs text-gray-900 font-mono mt-1">alakh@pw.live</p>
-                                <p className="text-xs text-gray-500 font-mono">password123</p>
+                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Faculty</p>
+                                <p className="text-xs text-gray-900 dark:text-white font-mono mt-1">alakh@pw.live</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">password123</p>
                             </div>
-                            <div className="text-center p-2 bg-gray-50 rounded-lg border border-gray-100">
-                                <p className="text-xs font-semibold text-gray-500 uppercase">Admin</p>
-                                <p className="text-xs text-gray-900 font-mono mt-1">admin@pw.live</p>
-                                <p className="text-xs text-gray-500 font-mono">password123</p>
+                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Admin</p>
+                                <p className="text-xs text-gray-900 dark:text-white font-mono mt-1">admin@pw.live</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">password123</p>
                             </div>
                         </div>
                     </div>
