@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useLocationContext } from '../context/LocationContext';
 import pwLogo from '../assets/pw-logo.png';
@@ -177,7 +178,7 @@ const Navbar = () => {
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
-                                                user.name.charAt(0)
+                                                user.name ? user.name.charAt(0) : 'U'
                                             )}
                                         </div>
                                         <div>
@@ -263,9 +264,20 @@ const Navbar = () => {
                                     />
                                 </div>
                                 <button
-                                    onClick={() => {
-                                        detectLocation();
-                                        setShowCityModal(false);
+                                    onClick={async () => {
+                                        try {
+                                            await detectLocation();
+                                            setShowCityModal(false);
+                                        } catch (error) {
+                                            console.error("Location detection failed:", error);
+                                            if (error.code === 1) {
+                                                toast.error("Location access denied. Please enable permissions in your browser settings.");
+                                            } else if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
+                                                toast.error("Location requires HTTPS. Please use the Ngrok URL.");
+                                            } else {
+                                                toast.error("Failed to detect location. Please try again.");
+                                            }
+                                        }
                                     }}
                                     className="mt-4 flex items-center gap-2 text-primary font-semibold hover:underline"
                                 >

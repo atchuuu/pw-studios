@@ -21,7 +21,7 @@ const Dashboard = () => {
                 if (isNearMe && userLocation) {
                     // Fetch nearest studios
                     const recRes = await axios.get(`${API_BASE_URL}/studios/recommendations?lat=${userLocation.lat}&lng=${userLocation.lng}`, config);
-                    setStudios(recRes.data);
+                    setStudios(Array.isArray(recRes.data) ? recRes.data : []);
                 } else {
                     // Fetch normal filtered list
                     let query = `?keyword=${searchKeyword}`;
@@ -30,7 +30,7 @@ const Dashboard = () => {
                     }
 
                     const studioRes = await axios.get(`${API_BASE_URL}/studios${query}`, config);
-                    setStudios(studioRes.data);
+                    setStudios(Array.isArray(studioRes.data) ? studioRes.data : []);
                 }
             } catch (error) {
                 console.error(error);
@@ -107,7 +107,7 @@ const Dashboard = () => {
                 {/* Grid View */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     <AnimatePresence>
-                        {studios.map((studio) => {
+                        {Array.isArray(studios) && studios.map((studio) => {
                             // Calculate distance if user location is available
                             const distance = userLocation && studio.lat && studio.lng
                                 ? calculateDistance(userLocation.lat, userLocation.lng, studio.lat, studio.lng)

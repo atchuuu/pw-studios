@@ -5,6 +5,10 @@ import { ThemeProvider } from './context/ThemeContext';
 import { LocationProvider } from './context/LocationContext';
 import Navbar from './components/Navbar';
 import { Toaster } from 'react-hot-toast';
+import axios from 'axios';
+
+// Skip ngrok browser warning
+axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login'));
