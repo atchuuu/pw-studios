@@ -44,6 +44,23 @@ const AllBookings = () => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
+    const handleCancelBooking = async (bookingId) => {
+        if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            await axios.put(`${API_BASE_URL}/bookings/${bookingId}/cancel`, {}, config);
+
+            // Update UI
+            setBookings(bookings.map(b =>
+                b._id === bookingId ? { ...b, status: 'cancelled' } : b
+            ));
+        } catch (error) {
+            console.error('Error cancelling booking:', error);
+            alert(error.response?.data?.message || 'Failed to cancel booking');
+        }
+    };
+
     if (loading && bookings.length === 0) return <div className="p-10 text-center text-gray-500">Loading bookings...</div>;
 
     return (
@@ -152,11 +169,21 @@ const AllBookings = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                            booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                                            }`}>
-                                            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                                booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                            </span>
+                                            {booking.status === 'confirmed' && (
+                                                <button
+                                                    onClick={() => handleCancelBooking(booking._id)}
+                                                    className="text-xs text-red-600 hover:text-red-800 font-medium hover:underline"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </motion.tr>
                             ))}

@@ -6,11 +6,17 @@ import pwLogo from '../assets/pw-logo.png';
 import { API_BASE_URL } from '../utils/apiConfig';
 
 const Login = () => {
-    const { loginWithToken } = useAuth();
+    const { loginWithToken, user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -21,18 +27,16 @@ const Login = () => {
             setError(errorParam);
         }
 
-        if (token) {
+        if (token && !user) {
             setLoading(true);
             loginWithToken(token).then((res) => {
-                if (res.success) {
-                    navigate('/');
-                } else {
+                if (!res.success) {
                     setError(res.error);
                     setLoading(false);
                 }
             });
         }
-    }, [location, loginWithToken, navigate]);
+    }, [location, loginWithToken, user]);
 
     const handleGoogleLogin = () => {
         const callbackUrl = encodeURIComponent(window.location.origin);

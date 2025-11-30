@@ -19,8 +19,28 @@ const StudioDetails = () => {
     const [loading, setLoading] = useState(false);
     const [showUnitModal, setShowUnitModal] = useState(false);
     const [activeTab, setActiveTab] = useState('interior'); // For album view
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const bookingSectionRef = useRef(null);
+
+    // Combine images for slideshow: Interior first, then Exterior
+    const interiorImages = studio?.interiorPhotos || [];
+    const exteriorImages = studio?.exteriorPhotos || [];
+    const allImages = [...interiorImages, ...exteriorImages];
+
+    // Auto-advance slideshow
+    useEffect(() => {
+        if (allImages.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, [allImages.length]);
+
+    const getImageLabel = (index) => {
+        if (index < interiorImages.length) return "Interior View";
+        return "Exterior View";
+    };
 
     useEffect(() => {
         const fetchStudio = async () => {
@@ -98,14 +118,35 @@ const StudioDetails = () => {
             className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20"
         >
             {/* 1. Hero Section */}
-            <div className="relative h-[70vh] min-h-[500px]">
-                <img
-                    src={getImageUrl(studio.images[0] || studio.exteriorPhotos[0])}
-                    alt={studio.name}
-                    className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-16 max-w-7xl mx-auto">
+            <div className="relative h-[70vh] min-h-[500px] overflow-hidden">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={currentImageIndex}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1 }}
+                        className="absolute inset-0"
+                    >
+                        <img
+                            src={getImageUrl(allImages[currentImageIndex])}
+                            alt={studio.name}
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+                    </motion.div>
+                </AnimatePresence>
+
+                {/* Image Label (Interior/Exterior) */}
+                {allImages.length > 0 && (
+                    <div className="absolute top-24 right-4 sm:right-8 z-20">
+                        <span className="bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-bold border border-white/20">
+                            {getImageLabel(currentImageIndex)}
+                        </span>
+                    </div>
+                )}
+
+                <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-16 max-w-7xl mx-auto z-20">
                     <motion.div
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -259,7 +300,7 @@ const StudioDetails = () => {
                                         {studio.interiorPhotos?.length > 0 ? (
                                             studio.interiorPhotos.map((img, idx) => (
                                                 <div key={idx} className="group relative aspect-video rounded-xl overflow-hidden cursor-pointer">
-                                                    <img src={getImageUrl(img)} alt={`Interior ${idx}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                    <img src={getImageUrl(img)} alt={`Interior ${idx}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                                 </div>
                                             ))
@@ -281,7 +322,7 @@ const StudioDetails = () => {
                                         {studio.exteriorPhotos?.length > 0 ? (
                                             studio.exteriorPhotos.map((img, idx) => (
                                                 <div key={idx} className="group relative aspect-video rounded-xl overflow-hidden cursor-pointer">
-                                                    <img src={getImageUrl(img)} alt={`Exterior ${idx}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                    <img src={getImageUrl(img)} alt={`Exterior ${idx}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                                 </div>
                                             ))

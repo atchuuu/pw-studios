@@ -13,7 +13,9 @@ const storage = multer.diskStorage({
         } else if (req.query.type === 'studio' && req.query.studioCode && req.query.category) {
             // Sanitize studioCode to prevent directory traversal or invalid chars
             const studioCode = req.query.studioCode.replace(/[^a-zA-Z0-9]/g, '');
-            const category = req.query.category === 'interior' ? 'interior' : 'exterior';
+            let category = 'exterior';
+            if (req.query.category === 'interior') category = 'interior';
+            if (req.query.category === 'cover') category = 'cover';
             uploadPath = `uploads/studios/${studioCode}/${category}/`;
         }
 

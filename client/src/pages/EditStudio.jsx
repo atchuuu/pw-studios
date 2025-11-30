@@ -27,7 +27,8 @@ const EditStudio = () => {
         lng: '',
         facilities: '',
         interiorPhotos: '',
-        exteriorPhotos: ''
+        exteriorPhotos: '',
+        coverPhoto: ''
     });
 
     useEffect(() => {
@@ -50,7 +51,8 @@ const EditStudio = () => {
                     lng: data.lng || '',
                     facilities: data.facilities ? data.facilities.join(', ') : '',
                     interiorPhotos: data.interiorPhotos ? data.interiorPhotos.join(', ') : '',
-                    exteriorPhotos: data.exteriorPhotos ? data.exteriorPhotos.join(', ') : ''
+                    exteriorPhotos: data.exteriorPhotos ? data.exteriorPhotos.join(', ') : '',
+                    coverPhoto: data.coverPhoto || ''
                 });
             } catch (error) {
                 console.error("Failed to fetch studio", error);
@@ -79,7 +81,9 @@ const EditStudio = () => {
                 return;
             }
 
-            const category = type === 'interiorPhotos' ? 'interior' : 'exterior';
+            let category = 'exterior';
+            if (type === 'interiorPhotos') category = 'interior';
+            if (type === 'coverPhoto') category = 'cover';
 
             for (const file of files) {
                 const uploadFormData = new FormData();
@@ -93,6 +97,10 @@ const EditStudio = () => {
             }
 
             setFormData(prev => {
+                if (type === 'coverPhoto') {
+                    // For cover photo, replace the existing one (take the last uploaded if multiple selected by mistake)
+                    return { ...prev, [type]: uploadedUrls[uploadedUrls.length - 1] };
+                }
                 const currentUrls = prev[type] ? prev[type].split(',').map(u => u.trim()).filter(u => u) : [];
                 const newUrls = [...currentUrls, ...uploadedUrls].join(', ');
                 return { ...prev, [type]: newUrls };
@@ -116,7 +124,8 @@ const EditStudio = () => {
                 ...formData,
                 facilities: formData.facilities.split(',').map(f => f.trim()),
                 interiorPhotos: formData.interiorPhotos.split(',').map(f => f.trim()).filter(f => f),
-                exteriorPhotos: formData.exteriorPhotos.split(',').map(f => f.trim()).filter(f => f)
+                exteriorPhotos: formData.exteriorPhotos.split(',').map(f => f.trim()).filter(f => f),
+                coverPhoto: formData.coverPhoto
             };
 
             await axios.put(`${API_BASE_URL}/studios/${id}`, updatedData, config);
@@ -280,6 +289,37 @@ const EditStudio = () => {
                                     onChange={handleChange}
                                     className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
                                 />
+                            </div>
+
+                            {/* Cover Photo */}
+                            <div className="md:col-span-2">
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cover Photo (URL)</label>
+                                    <label className="cursor-pointer text-primary hover:text-indigo-700 flex items-center gap-1 text-sm font-bold">
+                                        {uploading ? <FaSpinner className="animate-spin" /> : <FaCloudUploadAlt />}
+                                        Upload Cover
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => handleImageUpload(e, 'coverPhoto')}
+                                            disabled={uploading}
+                                        />
+                                    </label>
+                                </div>
+                                <input
+                                    type="text"
+                                    name="coverPhoto"
+                                    value={formData.coverPhoto || ''}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                                    placeholder="https://example.com/cover.jpg"
+                                />
+                                {formData.coverPhoto && (
+                                    <div className="mt-2 relative w-full h-48 rounded-lg overflow-hidden">
+                                        <img src={formData.coverPhoto.startsWith('http') ? formData.coverPhoto : `${API_BASE_URL}${formData.coverPhoto}`} alt="Cover Preview" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Exterior Photos */}

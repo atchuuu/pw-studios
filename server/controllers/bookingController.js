@@ -29,10 +29,10 @@ const createBooking = asyncHandler(async (req, res) => {
         studio: studioId,
         studioUnit: studioUnit,
         status: 'confirmed',
-        $or: [
-            { startTime: { $lt: end, $gte: start } },
-            { endTime: { $gt: start, $lte: end } },
-        ],
+        $and: [
+            { startTime: { $lt: end } },
+            { endTime: { $gt: start } }
+        ]
     });
 
     if (conflict) {
@@ -138,4 +138,34 @@ const getAllBookings = asyncHandler(async (req, res) => {
     res.json(bookings);
 });
 
-module.exports = { createBooking, getMyBookings, getAllBookings, getStudioBookings };
+// @desc    Cancel booking
+// @route   PUT /api/bookings/:id/cancel
+// @access  Private
+const cancelBooking = asyncHandler(async (req, res) => {
+    const booking = await Booking.findById(req.params.id).populate('studio');
+
+    if (!booking) {
+        res.status(404);
+        throw new Error('Booking not found');
+    }
+
+    // Check permissions
+    // 1. Super Admin can cancel any booking
+    // 2. Studio Admin can cancel bookings for their studio
+    // 3. User can cancel their own booking
+
+    const isSuperAdmin = req.user.role === 'super_admin';
+    const isStudioAdmin = req.user.role === 'studio_admin' && booking.studio.admin.toString() === req.user._id.toString();
+    const isBookingOwner = booking.user.toString() === req.user._id.toString();
+
+    if (isSuperAdmin || isStudioAdmin || isBookingOwner) {
+        booking.status = 'cancelled';
+        const updatedBooking = await booking.save();
+        res.json(updatedBooking);
+    } else {
+        res.status(401);
+        throw new Error('Not authorized to cancel this booking');
+    }
+});
+
+module.exports = { createBooking, getMyBookings, getAllBookings, getStudioBookings, cancelBooking };

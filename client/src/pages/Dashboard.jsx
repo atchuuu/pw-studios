@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaSearch, FaMapMarkerAlt } from 'react-icons/fa';
 import { API_BASE_URL } from '../utils/apiConfig';
+import defaultCover from '../assets/profile-banner.png';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -124,8 +125,10 @@ const Dashboard = () => {
                                 >
                                     <div className="relative h-48 overflow-hidden">
                                         <img
-                                            src={studio.images[0]}
+                                            src={studio.coverPhoto ? (studio.coverPhoto.startsWith('http') ? studio.coverPhoto : `${API_BASE_URL}${studio.coverPhoto}`) : defaultCover}
                                             alt={studio.name}
+                                            loading="lazy"
+                                            decoding="async"
                                             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

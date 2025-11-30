@@ -20,7 +20,7 @@ router.get('/google', (req, res, next) => {
 // @route   GET /api/auth/google/callback
 router.get(
     '/google/callback',
-    passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}/login?error=Invalid Email. Use only @pw.live and @physicswallah.org domains`, session: false }),
+    passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=Invalid Email. Use only @pw.live and @physicswallah.org domains`, session: false }),
     googleAuthCallback
 );
 
