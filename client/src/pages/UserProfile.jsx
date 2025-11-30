@@ -8,7 +8,7 @@ import { API_BASE_URL } from '../utils/apiConfig';
 import profileBanner from '../assets/profile-banner.png';
 
 const UserProfile = () => {
-    const { user, updateUser } = useAuth();
+    const { user, updateUser } = useAuth(); // Assuming login updates the user state, or we might need a dedicated updateUser function in context
     const [uploading, setUploading] = useState(false);
 
     const handleImageUpload = async (e) => {

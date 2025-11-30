@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../utils/apiConfig';
-import { FaSave, FaArrowLeft, FaCloudUploadAlt, FaSpinner, FaImage } from 'react-icons/fa';
+import { FaSave, FaArrowLeft, FaCloudUploadAlt, FaSpinner } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const EditStudio = () => {
@@ -27,8 +27,7 @@ const EditStudio = () => {
         lng: '',
         facilities: '',
         interiorPhotos: '',
-        exteriorPhotos: '',
-        coverPhoto: ''
+        exteriorPhotos: ''
     });
 
     useEffect(() => {
@@ -51,8 +50,7 @@ const EditStudio = () => {
                     lng: data.lng || '',
                     facilities: data.facilities ? data.facilities.join(', ') : '',
                     interiorPhotos: data.interiorPhotos ? data.interiorPhotos.join(', ') : '',
-                    exteriorPhotos: data.exteriorPhotos ? data.exteriorPhotos.join(', ') : '',
-                    coverPhoto: data.coverPhoto || ''
+                    exteriorPhotos: data.exteriorPhotos ? data.exteriorPhotos.join(', ') : ''
                 });
             } catch (error) {
                 console.error("Failed to fetch studio", error);
@@ -70,21 +68,18 @@ const EditStudio = () => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
 
-        if (!formData.studioCode) {
-            toast.error("Please enter a Studio Code first");
-            return;
-        }
-
         setUploading(true);
         try {
             const config = { headers: { 'Content-Type': 'multipart/form-data' } };
             const uploadedUrls = [];
 
-            // Determine category for backend storage
-            let category = 'temp';
-            if (type === 'interiorPhotos') category = 'interior';
-            else if (type === 'exteriorPhotos') category = 'exterior';
-            else if (type === 'coverPhoto') category = 'cover';
+            if (!formData.studioCode) {
+                toast.error("Please enter a Studio Code first");
+                setUploading(false);
+                return;
+            }
+
+            const category = type === 'interiorPhotos' ? 'interior' : 'exterior';
 
             for (const file of files) {
                 const uploadFormData = new FormData();
@@ -97,16 +92,11 @@ const EditStudio = () => {
                 uploadedUrls.push(data);
             }
 
-            if (type === 'coverPhoto') {
-                // For cover photo, we only keep the last uploaded one if multiple selected (though input should be single)
-                setFormData(prev => ({ ...prev, coverPhoto: uploadedUrls[uploadedUrls.length - 1] }));
-            } else {
-                setFormData(prev => {
-                    const currentUrls = prev[type] ? prev[type].split(',').map(u => u.trim()).filter(u => u) : [];
-                    const newUrls = [...currentUrls, ...uploadedUrls].join(', ');
-                    return { ...prev, [type]: newUrls };
-                });
-            }
+            setFormData(prev => {
+                const currentUrls = prev[type] ? prev[type].split(',').map(u => u.trim()).filter(u => u) : [];
+                const newUrls = [...currentUrls, ...uploadedUrls].join(', ');
+                return { ...prev, [type]: newUrls };
+            });
             toast.success('Images uploaded successfully');
 
         } catch (error) {
@@ -126,8 +116,7 @@ const EditStudio = () => {
                 ...formData,
                 facilities: formData.facilities.split(',').map(f => f.trim()),
                 interiorPhotos: formData.interiorPhotos.split(',').map(f => f.trim()).filter(f => f),
-                exteriorPhotos: formData.exteriorPhotos.split(',').map(f => f.trim()).filter(f => f),
-                coverPhoto: formData.coverPhoto
+                exteriorPhotos: formData.exteriorPhotos.split(',').map(f => f.trim()).filter(f => f)
             };
 
             await axios.put(`${API_BASE_URL}/studios/${id}`, updatedData, config);
@@ -155,37 +144,6 @@ const EditStudio = () => {
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Edit Studio</h1>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Cover Photo Section */}
-                        <div className="mb-8 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700/30">
-                            <div className="flex justify-between items-center mb-4">
-                                <label className="block text-lg font-medium text-gray-700 dark:text-gray-300">Cover Photo</label>
-                                <label className="cursor-pointer bg-primary text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2">
-                                    {uploading ? <FaSpinner className="animate-spin" /> : <FaImage />}
-                                    Upload Cover
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={(e) => handleImageUpload(e, 'coverPhoto')}
-                                        disabled={uploading}
-                                    />
-                                </label>
-                            </div>
-                            {formData.coverPhoto ? (
-                                <div className="relative aspect-video rounded-lg overflow-hidden shadow-md">
-                                    <img
-                                        src={formData.coverPhoto.startsWith('http') ? formData.coverPhoto : `${import.meta.env.VITE_SERVER_URL}${formData.coverPhoto}`}
-                                        alt="Cover"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="aspect-video rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-500">
-                                    <span className="flex items-center gap-2"><FaImage /> No Cover Photo</span>
-                                </div>
-                            )}
-                        </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Studio Name</label>
