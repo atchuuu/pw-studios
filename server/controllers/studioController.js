@@ -47,7 +47,12 @@ const getStudios = asyncHandler(async (req, res) => {
         sortOption.city = 1; // Ascending
     }
 
-    const studios = await Studio.find(query).sort(sortOption);
+    let studios;
+    if (lat && lng) {
+        studios = await Studio.find(query);
+    } else {
+        studios = await Studio.find(query).sort(sortOption);
+    }
     res.json(studios);
 });
 
