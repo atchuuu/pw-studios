@@ -66,56 +66,60 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+        <div className="min-h-screen bg-gray-50 dark:bg-dark-bg pb-20 transition-colors duration-300">
             {/* Hero Section */}
-            <div className="bg-[#1B2124] text-white py-16 px-4 sm:px-6 lg:px-8 mb-8 shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                    <div className="w-96 h-96 bg-[#5A4BDA] rounded-full blur-3xl absolute -top-20 -left-20"></div>
-                    <div className="w-96 h-96 bg-[#D9D9D9] rounded-full blur-3xl absolute bottom-0 right-0 opacity-20"></div>
+            <div className="relative bg-dark-bg text-white overflow-hidden mb-12">
+                <div className="absolute inset-0">
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-600/30 rounded-full blur-[128px] mix-blend-screen animate-pulse-slow"></div>
+                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-[128px] mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
                 </div>
-                <div className="max-w-7xl mx-auto text-center relative z-10">
+
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 text-center z-10">
                     <motion.h1
-                        initial={{ y: -20, opacity: 0 }}
+                        initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="text-4xl sm:text-6xl font-extrabold mb-4 tracking-tight"
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                        className="text-5xl sm:text-7xl font-display font-extrabold mb-6 tracking-tight leading-tight"
                     >
-                        <span className="text-white">Physics</span> <span className="text-[#5A4BDA]">Wallah</span> <span className="text-white">Studios</span>
+                        <span className="text-white">Physics</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent">Wallah</span> <span className="text-white">Studios</span>
                     </motion.h1>
                     <motion.p
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-xl text-gray-300 max-w-2xl mx-auto"
+                        transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+                        className="text-xl sm:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed"
                     >
-                        Premium recording spaces for our educators.
+                        Premium recording spaces designed for world-class education.
                     </motion.p>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-
-
-
                 {/* Results Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        {isNearMe ? (
-                            <>
-                                <FaMapMarkerAlt className="text-red-500" /> Studios Near You
-                            </>
-                        ) : (
-                            <>
-                                All Studios <span className="text-sm font-normal text-gray-500 ml-2">({studios.length})</span>
-                            </>
-                        )}
-                    </h2>
+                <div className="flex flex-col sm:flex-row justify-between items-end mb-8 gap-4 border-b border-gray-200 dark:border-gray-800 pb-4">
+                    <div>
+                        <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            {isNearMe ? (
+                                <>
+                                    <span className="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500">
+                                        <FaMapMarkerAlt size={20} />
+                                    </span>
+                                    Studios Near You
+                                </>
+                            ) : (
+                                <>
+                                    All Studios <span className="text-lg font-medium text-gray-500 dark:text-gray-400 self-end mb-1">({studios.length})</span>
+                                </>
+                            )}
+                        </h2>
+                    </div>
                 </div>
 
                 {/* Grid View */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     <AnimatePresence>
-                        {Array.isArray(studios) && studios.map((studio) => {
+                        {Array.isArray(studios) && studios.map((studio, index) => {
                             // Calculate distance if user location is available
                             const distance = userLocation && studio.lat && studio.lng
                                 ? calculateDistance(userLocation.lat, userLocation.lng, studio.lat, studio.lng)
@@ -125,53 +129,57 @@ const Dashboard = () => {
                                 <motion.div
                                     key={studio._id}
                                     layout
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden group flex flex-col h-full"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                                    className="glass-card rounded-2xl overflow-hidden group flex flex-col h-full"
                                 >
-                                    <div className="relative h-48 overflow-hidden">
+                                    <div className="relative aspect-[4/3] overflow-hidden">
                                         <img
                                             src={studio.coverPhoto ? (studio.coverPhoto.startsWith('http') || studio.coverPhoto.startsWith('/assets') ? studio.coverPhoto : `${API_BASE_URL}${studio.coverPhoto}`) : defaultCover}
                                             alt={studio.name}
                                             loading="lazy"
                                             decoding="async"
-                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
 
                                         {distance !== null && (
-                                            <div className="absolute top-3 right-3 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-900 dark:text-white shadow-sm flex items-center gap-1">
+                                            <div className="absolute top-4 right-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-gray-900 dark:text-white shadow-lg flex items-center gap-1.5 border border-white/20">
                                                 <FaMapMarkerAlt className="text-red-500" />
                                                 {distance.toFixed(1)} km
                                             </div>
                                         )}
 
-                                        <div className="absolute bottom-3 left-3 right-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                        <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                                             <Link
                                                 to={`/studios/${studio._id}`}
-                                                className="block w-full text-center bg-primary text-white py-2 rounded-lg font-semibold shadow-lg hover:bg-indigo-700 transition-colors"
+                                                className="block w-full text-center bg-white text-gray-900 dark:bg-brand-600 dark:text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all opacity-0 group-hover:opacity-100"
                                             >
                                                 Book Now
                                             </Link>
                                         </div>
                                     </div>
 
-                                    <div className="p-5 flex-grow flex flex-col">
-                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+                                    <div className="p-5 flex-grow flex flex-col relative">
+                                        <div className="mb-1">
+                                            <span className="text-xs font-bold tracking-wider text-brand-600 dark:text-brand-400 uppercase">{studio.city}</span>
+                                        </div>
+                                        <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                                             {studio.name}
                                         </h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2 h-10">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
                                             {studio.address}
                                         </p>
 
-                                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-sm">
-                                            <span className="text-gray-600 dark:text-gray-300 font-medium">
-                                                {studio.city}
-                                            </span>
-                                            <span className="text-primary font-bold bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded">
-                                                Studios: {studio.numStudios}
+                                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700/50 flex justify-between items-center text-sm">
+                                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                                <span className="font-medium">Available</span>
+                                            </div>
+                                            <span className="text-xs font-bold bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-600">
+                                                {studio.numStudios} Units
                                             </span>
                                         </div>
                                     </div>
@@ -182,16 +190,21 @@ const Dashboard = () => {
                 </div>
 
                 {studios.length === 0 && (
-                    <div className="text-center py-20">
-                        <p className="text-gray-500 dark:text-gray-400 text-xl">No studios found.</p>
+                    <div className="text-center py-24">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+                            <FaSearch className="text-gray-400 text-2xl" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No studios found</h3>
+                        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">We couldn't find any studios matching your current filters. Try adjusting your search criteria.</p>
                         <button
                             onClick={() => {
                                 setSearchKeyword('');
                                 setSelectedCity('');
+                                // Reset other filters if needed via context or a clear function
                             }}
-                            className="mt-4 text-primary hover:underline"
+                            className="px-6 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-semibold transition-colors shadow-lg shadow-brand-500/20"
                         >
-                            Clear Filters
+                            Clear All Filters
                         </button>
                     </div>
                 )}

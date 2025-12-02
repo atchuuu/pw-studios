@@ -106,27 +106,27 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200 sticky top-0 z-50">
+            <nav className="glass sticky top-0 z-50 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16 gap-4">
+                    <div className="flex justify-between items-center h-20 gap-6">
 
                         {/* Left: Logo & Location */}
-                        <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
+                        <div className="flex items-center gap-6 flex-shrink-0">
                             {/* Logo */}
-                            <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => navigate('/')}>
-                                <img className="h-8 sm:h-10 w-auto" src={pwLogo} alt="PW Studios" />
-                                <span className="ml-3 font-bold text-lg sm:text-xl text-gray-900 dark:text-white hidden md:block">PW Studios</span>
+                            <div className="flex-shrink-0 flex items-center cursor-pointer group" onClick={() => navigate('/')}>
+                                <img className="h-10 w-auto group-hover:scale-105 transition-transform duration-300" src={pwLogo} alt="PW Studios" />
+                                <span className="ml-3 font-display font-bold text-2xl text-gray-900 dark:text-white hidden md:block tracking-tight">PW Studios</span>
                             </div>
 
                             {/* Location Button */}
                             {user && (
                                 <button
                                     onClick={() => setShowCityModal(true)}
-                                    className="flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium bg-gray-100 dark:bg-gray-700/50 px-3 py-2 rounded-full"
+                                    className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-all text-sm font-medium bg-gray-100/50 dark:bg-gray-800/50 hover:bg-brand-50 dark:hover:bg-brand-900/20 px-4 py-2.5 rounded-full border border-transparent hover:border-brand-200 dark:hover:border-brand-800"
                                 >
-                                    <FaMapMarkerAlt className="text-primary" />
-                                    <span className="font-bold flex items-center gap-1 max-w-[100px] sm:max-w-none truncate">
-                                        {selectedCity || 'Select City'} <FaChevronDown size={10} />
+                                    <FaMapMarkerAlt className="text-brand-500" />
+                                    <span className="font-semibold flex items-center gap-1 max-w-[120px] sm:max-w-none truncate">
+                                        {selectedCity || 'Select City'} <FaChevronDown size={10} className="opacity-50" />
                                     </span>
                                 </button>
                             )}
@@ -134,10 +134,10 @@ const Navbar = () => {
 
                         {/* Center: Search Bar */}
                         {user && (
-                            <div className="flex-1 max-w-2xl mx-4 flex items-center gap-2 relative z-50">
-                                <div className="relative hidden md:block w-full">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <FaSearch className="text-gray-400" />
+                            <div className="flex-1 max-w-2xl mx-4 flex items-center gap-3 relative z-50">
+                                <div className="relative hidden md:block w-full group">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <FaSearch className="text-gray-400 group-focus-within:text-brand-500 transition-colors" />
                                     </div>
                                     <input
                                         type="text"
@@ -146,24 +146,26 @@ const Navbar = () => {
                                         onFocus={() => setShowSuggestions(true)}
                                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                                         placeholder="Search studios..."
-                                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm transition-colors duration-200"
+                                        className="block w-full pl-11 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 shadow-sm"
                                     />
                                     <AnimatePresence>
                                         {showSuggestions && suggestions.length > 0 && (
                                             <motion.div
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: 10 }}
-                                                className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden"
+                                                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                                                className="absolute top-full left-0 right-0 mt-2 glass-card rounded-xl overflow-hidden z-50"
                                             >
                                                 {suggestions.map((studio) => (
                                                     <Link
                                                         key={studio._id}
                                                         to={`/studios/${studio._id}`}
-                                                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                                                        className="block px-5 py-3.5 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-colors border-b border-gray-100 dark:border-gray-700/50 last:border-0 group"
                                                     >
-                                                        <div className="font-medium text-gray-900 dark:text-white">{studio.name}</div>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{studio.city}</div>
+                                                        <div className="font-medium text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{studio.name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
+                                                            <FaMapMarkerAlt size={10} /> {studio.city}
+                                                        </div>
                                                     </Link>
                                                 ))}
                                             </motion.div>
@@ -172,7 +174,10 @@ const Navbar = () => {
                                 </div>
                                 <button
                                     onClick={() => setShowFilterModal(true)}
-                                    className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                                    className={`p-2.5 rounded-xl transition-all flex-shrink-0 border ${Object.keys(filters).some(k => filters[k] && (Array.isArray(filters[k]) ? filters[k].length > 0 : filters[k] !== 0))
+                                        ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800'
+                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 border-transparent'
+                                        }`}
                                     title="Advanced Filters"
                                 >
                                     <FaFilter />
@@ -181,12 +186,12 @@ const Navbar = () => {
                         )}
 
                         {/* Right: Theme Toggle & Hamburger */}
-                        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                        <div className="flex items-center gap-3 flex-shrink-0">
                             <button
                                 onClick={() => setShowSidebar(true)}
-                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                                className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
                             >
-                                <FaBars size={24} />
+                                <FaBars size={22} />
                             </button>
                         </div>
                     </div>
@@ -201,22 +206,22 @@ const Navbar = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
                             onClick={() => setShowSidebar(false)}
                         />
                         <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 shadow-2xl z-[70] flex flex-col"
+                            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                            className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl z-[70] flex flex-col border-l border-gray-200 dark:border-gray-800"
                         >
                             {/* Sidebar Header */}
-                            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Menu</h2>
+                            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                                <h2 className="text-xl font-display font-bold text-gray-900 dark:text-white">Menu</h2>
                                 <button
                                     onClick={() => setShowSidebar(false)}
-                                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+                                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
                                 >
                                     <FaTimes size={20} />
                                 </button>
@@ -228,9 +233,9 @@ const Navbar = () => {
                                     <Link
                                         to="/profile"
                                         onClick={() => setShowSidebar(false)}
-                                        className="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        className="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                                     >
-                                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl overflow-hidden">
+                                        <div className="w-12 h-12 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 font-bold text-xl overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-sm">
                                             {user.profilePicture ? (
                                                 <img
                                                     src={user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/assets') ? user.profilePicture : `${API_BASE_URL}${user.profilePicture}`}
@@ -252,14 +257,14 @@ const Navbar = () => {
                                     <Link
                                         to="/"
                                         onClick={() => setShowSidebar(false)}
-                                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium"
+                                        className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium"
                                     >
                                         <FaSearch className="text-gray-400" /> Browse Studios
                                     </Link>
                                     <Link
                                         to="/bookings"
                                         onClick={() => setShowSidebar(false)}
-                                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium"
+                                        className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium"
                                     >
                                         <FaCalendarAlt className="text-gray-400" /> My Bookings
                                     </Link>
@@ -267,14 +272,14 @@ const Navbar = () => {
                                         <Link
                                             to="/admin"
                                             onClick={() => setShowSidebar(false)}
-                                            className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium"
+                                            className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-brand-50 dark:hover:bg-brand-900/10 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium"
                                         >
                                             <FaUserShield className="text-gray-400" /> Admin Dashboard
                                         </Link>
                                     )}
                                 </div>
 
-                                <div className="pt-6 border-t border-gray-100 dark:border-gray-700">
+                                <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
                                     <div className="flex items-center justify-between px-4 py-3">
                                         <span className="text-gray-700 dark:text-gray-200 font-medium">Appearance</span>
                                         <ThemeToggle />
@@ -283,10 +288,10 @@ const Navbar = () => {
                             </div>
 
                             {/* Sidebar Footer */}
-                            <div className="p-6 border-t border-gray-100 dark:border-gray-700">
+                            <div className="p-6 border-t border-gray-100 dark:border-gray-800">
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 py-3 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                    className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 py-3.5 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
                                 >
                                     <FaSignOutAlt /> Logout
                                 </button>
@@ -308,20 +313,26 @@ const Navbar = () => {
                             onClick={() => setShowCityModal(false)}
                         />
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[80vh] flex flex-col"
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="relative glass-card rounded-2xl w-full max-w-2xl overflow-hidden max-h-[85vh] flex flex-col shadow-2xl"
                         >
                             {/* Header */}
-                            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+                            <div className="p-6 border-b border-gray-100 dark:border-gray-700/50 flex-shrink-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
                                 <div className="relative">
                                     <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                                     <input
                                         type="text"
                                         placeholder="Search for your city"
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all shadow-sm"
                                     />
+                                    <button
+                                        onClick={() => setShowCityModal(false)}
+                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                    >
+                                        <FaTimes />
+                                    </button>
                                 </div>
                                 <button
                                     onClick={async () => {
@@ -339,19 +350,19 @@ const Navbar = () => {
                                             }
                                         }
                                     }}
-                                    className="mt-4 flex items-center gap-2 text-primary font-semibold hover:underline"
+                                    className="mt-4 flex items-center gap-2 text-brand-600 dark:text-brand-400 font-semibold hover:underline text-sm"
                                 >
                                     <FaLocationArrow /> {locationLoading ? 'Detecting...' : 'Detect my location'}
                                 </button>
                             </div>
 
                             {/* Popular Cities */}
-                            <div className="p-8 bg-gray-50 dark:bg-gray-900/50 overflow-y-auto custom-scrollbar flex-1">
-                                <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 text-center">Our Current Cities</h3>
+                            <div className="p-8 bg-gray-50/50 dark:bg-gray-900/30 overflow-y-auto custom-scrollbar flex-1">
+                                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 text-center">Select Location</h3>
                                 {loadingCities ? (
                                     <div className="text-center py-12 text-gray-500">Loading cities...</div>
                                 ) : (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                         {cities.map(city => (
                                             <button
                                                 key={city}
@@ -360,17 +371,20 @@ const Navbar = () => {
                                                     setShowCityModal(false);
                                                 }}
                                                 className={`
-                                                    group flex flex-col items-center justify-center p-6 rounded-2xl border transition-all aspect-square
+                                                    group flex flex-col items-center justify-center p-4 rounded-2xl border transition-all aspect-square relative overflow-hidden
                                                     ${(selectedCity === city || (city === 'All Locations' && selectedCity === ''))
-                                                        ? 'border-primary bg-primary/5 text-primary shadow-md ring-2 ring-primary/20'
-                                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1'
+                                                        ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 shadow-md ring-1 ring-brand-500/20'
+                                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-brand-300 dark:hover:border-brand-700 hover:shadow-lg hover:-translate-y-1'
                                                     }
                                                 `}
                                             >
-                                                <div className="mb-3 transform group-hover:scale-110 transition-transform duration-300">
+                                                <div className="mb-3 transform group-hover:scale-110 transition-transform duration-300 relative z-10">
                                                     {getCityVisual(city)}
                                                 </div>
-                                                <span className="font-bold text-sm sm:text-base text-center">{city}</span>
+                                                <span className="font-bold text-sm text-center relative z-10">{city}</span>
+                                                {(selectedCity === city || (city === 'All Locations' && selectedCity === '')) && (
+                                                    <div className="absolute inset-0 bg-brand-500/5 dark:bg-brand-400/5 z-0" />
+                                                )}
                                             </button>
                                         ))}
                                     </div>
@@ -384,23 +398,23 @@ const Navbar = () => {
             {/* Filter Modal */}
             <AnimatePresence>
                 {showFilterModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="glass-card rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
                         >
-                            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Filters</h3>
-                                <button onClick={() => setShowFilterModal(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                            <div className="p-6 border-b border-gray-100 dark:border-gray-700/50 flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
+                                <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white">Filters</h3>
+                                <button onClick={() => setShowFilterModal(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors">
                                     <FaTimes />
                                 </button>
                             </div>
-                            <div className="p-6 space-y-6">
+                            <div className="p-6 space-y-8 bg-white/30 dark:bg-gray-900/30">
                                 {/* Distance Filter */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Distance Range</label>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Distance Range</label>
                                     <div className="flex gap-2">
                                         {[
                                             { label: '< 5km', min: 0, max: 5 },
@@ -410,9 +424,9 @@ const Navbar = () => {
                                             <button
                                                 key={range.label}
                                                 onClick={() => setFilters({ ...filters, minDistance: range.min, maxDistance: range.max })}
-                                                className={`px-3 py-1.5 rounded-lg text-sm border ${filters.minDistance === range.min && filters.maxDistance === range.max
-                                                        ? 'bg-primary text-white border-primary'
-                                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+                                                className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-medium border transition-all ${filters.minDistance === range.min && filters.maxDistance === range.max
+                                                    ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/30'
+                                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:border-brand-300 dark:hover:border-brand-700'
                                                     }`}
                                             >
                                                 {range.label}
@@ -423,38 +437,42 @@ const Navbar = () => {
 
                                 {/* Availability Filter */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Availability</label>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Availability</label>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <input
-                                            type="date"
-                                            value={filters.date}
-                                            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                        <input
-                                            type="time"
-                                            value={filters.time}
-                                            onChange={(e) => setFilters({ ...filters, time: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                type="date"
+                                                value={filters.date}
+                                                onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+                                                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
+                                            />
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="time"
+                                                value={filters.time}
+                                                onChange={(e) => setFilters({ ...filters, time: e.target.value })}
+                                                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Num Studios */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Min Studios</label>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Min Studios</label>
                                     <input
                                         type="number"
                                         min="1"
                                         value={filters.numStudios}
                                         onChange={(e) => setFilters({ ...filters, numStudios: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                        className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
                                     />
                                 </div>
 
                                 {/* Facilities */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Facilities</label>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Facilities</label>
                                     <div className="flex flex-wrap gap-2">
                                         {['Wi-Fi', 'Parking', 'AC', 'Green Screen', 'Soundproof'].map((facility) => (
                                             <button
@@ -465,9 +483,9 @@ const Navbar = () => {
                                                         : [...filters.facilities, facility];
                                                     setFilters({ ...filters, facilities: newFacilities });
                                                 }}
-                                                className={`px-3 py-1.5 rounded-lg text-sm border ${filters.facilities.includes(facility)
-                                                        ? 'bg-primary text-white border-primary'
-                                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+                                                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${filters.facilities.includes(facility)
+                                                    ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-500/20'
+                                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:border-brand-300 dark:hover:border-brand-700'
                                                     }`}
                                             >
                                                 {facility}
@@ -476,7 +494,7 @@ const Navbar = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+                            <div className="p-6 border-t border-gray-100 dark:border-gray-700/50 flex justify-end gap-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
                                 <button
                                     onClick={() => setFilters({
                                         minDistance: 0,
@@ -486,13 +504,13 @@ const Navbar = () => {
                                         numStudios: 0,
                                         facilities: []
                                     })}
-                                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                    className="px-5 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
                                 >
                                     Reset
                                 </button>
                                 <button
                                     onClick={() => setShowFilterModal(false)}
-                                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700"
+                                    className="px-8 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-semibold shadow-lg shadow-brand-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     Apply Filters
                                 </button>

@@ -68,26 +68,27 @@ const UserProfile = () => {
     if (!user) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md mx-auto">
+        <div className="min-h-screen bg-gray-50 dark:bg-dark-bg py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+            <div className="max-w-lg mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-700"
+                    className="glass-card rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-700/50 shadow-2xl"
                 >
                     {/* Header / Cover */}
                     <div
-                        className="h-32 bg-cover bg-center relative"
+                        className="h-40 bg-cover bg-center relative"
                         style={{ backgroundImage: `url(${profileBanner})` }}
                     >
-                        <div className="absolute inset-0 bg-black/20"></div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/60"></div>
+                        <div className="absolute inset-0 bg-brand-900/20 mix-blend-overlay"></div>
                     </div>
 
                     {/* Profile Picture Section */}
-                    <div className="relative -mt-16 text-center">
+                    <div className="relative -mt-20 text-center px-6">
                         <div className="relative inline-block">
-                            <div className="w-32 h-32 rounded-full bg-white dark:bg-gray-800 p-1 shadow-xl mx-auto relative group">
+                            <div className="w-40 h-40 rounded-full bg-white dark:bg-dark-card p-1.5 shadow-2xl mx-auto relative group ring-4 ring-white/10 dark:ring-black/20">
                                 {user.profilePicture ? (
                                     <img
                                         src={user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/assets') ? user.profilePicture : `${import.meta.env.VITE_SERVER_URL}${user.profilePicture}`}
@@ -95,7 +96,7 @@ const UserProfile = () => {
                                         className="w-full h-full rounded-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-4xl font-bold text-gray-500 dark:text-gray-400">
+                                    <div className="w-full h-full rounded-full bg-gradient-to-br from-brand-100 to-brand-50 dark:from-brand-900/40 dark:to-brand-800/20 flex items-center justify-center text-5xl font-bold text-brand-500 dark:text-brand-400">
                                         {user.name.charAt(0)}
                                     </div>
                                 )}
@@ -104,16 +105,16 @@ const UserProfile = () => {
                                 {user.profilePicture && (
                                     <button
                                         onClick={handleRemovePicture}
-                                        className="absolute top-0 right-0 bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition-colors z-10"
+                                        className="absolute top-1 right-1 bg-red-500 text-white p-2.5 rounded-full shadow-lg hover:bg-red-600 transition-all z-10 hover:scale-110"
                                         title="Remove Picture"
                                     >
-                                        <FaTrash size={12} />
+                                        <FaTrash size={14} />
                                     </button>
                                 )}
                             </div>
 
-                            <label htmlFor="profile-upload" className="absolute bottom-0 right-0 bg-white dark:bg-gray-700 p-2 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-primary cursor-pointer">
-                                {uploading ? <FaSpinner className="animate-spin" size={14} /> : <FaCamera size={14} />}
+                            <label htmlFor="profile-upload" className="absolute bottom-2 right-2 bg-brand-600 text-white p-3 rounded-full shadow-lg hover:bg-brand-700 transition-all cursor-pointer hover:scale-110 ring-4 ring-white dark:ring-dark-card">
+                                {uploading ? <FaSpinner className="animate-spin" size={16} /> : <FaCamera size={16} />}
                             </label>
                             <input
                                 id="profile-upload"
@@ -123,39 +124,39 @@ const UserProfile = () => {
                                 onChange={handleImageUpload}
                             />
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-4">{user.name}</h1>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">{user.email}</p>
+                        <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white mt-4">{user.name}</h1>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">{user.email}</p>
                     </div>
 
                     {/* Vertical Content */}
-                    <div className="p-8 space-y-6">
-                        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-gray-100 dark:border-gray-700">
-                            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
-                                <FaUser />
+                    <div className="p-8 space-y-4">
+                        <div className="flex items-center gap-5 p-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 transition-colors hover:bg-gray-100 dark:hover:bg-white/10">
+                            <div className="p-3.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl shadow-sm">
+                                <FaUser size={20} />
                             </div>
                             <div>
-                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Full Name</p>
-                                <p className="text-base font-bold text-gray-900 dark:text-white">{user.name}</p>
+                                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Full Name</p>
+                                <p className="text-lg font-bold text-gray-900 dark:text-white">{user.name}</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-gray-100 dark:border-gray-700">
-                            <div className="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-xl">
-                                <FaEnvelope />
+                        <div className="flex items-center gap-5 p-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 transition-colors hover:bg-gray-100 dark:hover:bg-white/10">
+                            <div className="p-3.5 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 rounded-xl shadow-sm">
+                                <FaEnvelope size={20} />
                             </div>
                             <div>
-                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</p>
-                                <p className="text-base font-bold text-gray-900 dark:text-white break-all">{user.email}</p>
+                                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Email</p>
+                                <p className="text-lg font-bold text-gray-900 dark:text-white break-all">{user.email}</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-gray-100 dark:border-gray-700">
-                            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl">
-                                <FaShieldAlt />
+                        <div className="flex items-center gap-5 p-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 transition-colors hover:bg-gray-100 dark:hover:bg-white/10">
+                            <div className="p-3.5 bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-xl shadow-sm">
+                                <FaShieldAlt size={20} />
                             </div>
                             <div>
-                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</p>
-                                <p className="text-base font-bold text-gray-900 dark:text-white capitalize">{user.role.replace('_', ' ')}</p>
+                                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Role</p>
+                                <p className="text-lg font-bold text-gray-900 dark:text-white capitalize">{user.role.replace('_', ' ')}</p>
                             </div>
                         </div>
                     </div>

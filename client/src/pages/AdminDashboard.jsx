@@ -30,26 +30,26 @@ const AdminDashboard = () => {
     const allowedTabs = tabs.filter(tab => tab.roles.includes(user.role));
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-dark-bg pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
             <div className="max-w-7xl mx-auto">
-                <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Portal</h1>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400">Manage studios, users, and bookings</p>
+                <div className="mb-10 text-center">
+                    <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-2">Admin Portal</h1>
+                    <p className="text-lg text-gray-600 dark:text-gray-400">Manage studios, users, and bookings</p>
                 </div>
 
                 {/* Top Navigation */}
-                <div className="flex justify-center mb-8">
-                    <div className="bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 inline-flex">
+                <div className="flex justify-center mb-10">
+                    <div className="glass p-1.5 rounded-2xl shadow-lg inline-flex border border-white/20 dark:border-gray-700/50 backdrop-blur-xl bg-white/40 dark:bg-black/40">
                         {allowedTabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${activeTab === tab.id
-                                        ? 'bg-primary text-white shadow-md shadow-primary/25'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === tab.id
+                                    ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/30'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
                                     }`}
                             >
-                                {tab.icon}
+                                <span className="text-lg">{tab.icon}</span>
                                 {tab.label}
                             </button>
                         ))}
@@ -63,7 +63,7 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: 0.3 }}
                     >
                         {activeTab === 'studios' && <StudioList />}
                         {activeTab === 'users' && user.role === 'super_admin' && <UserList />}

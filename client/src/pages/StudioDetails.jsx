@@ -111,21 +111,22 @@ const StudioDetails = () => {
     if (!studio) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
 
     return (
+
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20"
+            className="min-h-screen bg-gray-50 dark:bg-dark-bg pb-20 transition-colors duration-300"
         >
             {/* 1. Hero Section */}
             <div className="relative h-[70vh] min-h-[500px] overflow-hidden">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentImageIndex}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        initial={{ opacity: 0, scale: 1.1 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 1 }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
                         className="absolute inset-0"
                     >
                         <img
@@ -133,49 +134,49 @@ const StudioDetails = () => {
                             alt={studio.name}
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/60 to-transparent" />
+                        <div className="absolute inset-0 bg-brand-900/20 mix-blend-overlay" />
                     </motion.div>
                 </AnimatePresence>
 
                 {/* Image Label (Interior/Exterior) */}
                 {allImages.length > 0 && (
                     <div className="absolute top-24 right-4 sm:right-8 z-20">
-                        <span className="bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-bold border border-white/20">
+                        <span className="glass px-4 py-2 rounded-full text-white text-sm font-bold border border-white/20 shadow-lg backdrop-blur-md">
                             {getImageLabel(currentImageIndex)}
                         </span>
                     </div>
                 )}
 
-                <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-16 max-w-7xl mx-auto z-20">
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12 lg:p-16 max-w-7xl mx-auto z-20">
                     <motion.div
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.2 }}
+                        transition={{ delay: 0.2, duration: 0.6 }}
                     >
-                        <h1 className="text-4xl sm:text-6xl font-bold text-white mb-4 shadow-sm">
+                        <h1 className="text-4xl sm:text-6xl md:text-7xl font-display font-extrabold text-white mb-6 shadow-sm tracking-tight">
                             {studio.name}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-6 text-gray-200 text-lg mb-8">
-                            <p className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-6 text-gray-200 text-lg mb-8 font-medium">
+                            <p className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
                                 <FaMapMarkerAlt className="text-red-500" /> {studio.city}, {studio.area}
                             </p>
-                            <span className="hidden sm:inline text-gray-400">|</span>
-                            <p className="flex items-center gap-2">
-                                <FaUsers className="text-primary" /> {studio.numStudios} Studios Available
+                            <p className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
+                                <FaUsers className="text-brand-400" /> {studio.numStudios} Studios Available
                             </p>
                         </div>
 
                         <div className="flex flex-wrap gap-4">
                             <button
                                 onClick={scrollToBooking}
-                                className="bg-primary hover:bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-primary/50 flex items-center gap-2"
+                                className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-600/30 hover:shadow-brand-600/50 flex items-center gap-2 hover:-translate-y-1"
                             >
                                 Continue to Booking <FaArrowDown />
                             </button>
                             {user && (user.role === 'studio_admin' || user.role === 'super_admin') && (
                                 <button
                                     onClick={() => navigate(`/studios/${id}/edit`)}
-                                    className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-8 py-3 rounded-xl font-semibold transition-all border border-white/20 hover:border-white/40"
+                                    className="glass hover:bg-white/20 text-white px-8 py-3.5 rounded-xl font-semibold transition-all border border-white/20 hover:border-white/40"
                                 >
                                     Edit Studio Details
                                 </button>
@@ -185,7 +186,7 @@ const StudioDetails = () => {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10 space-y-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 space-y-12">
 
                 {/* 2. Overview & Info Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -194,21 +195,21 @@ const StudioDetails = () => {
                         initial={{ y: 20, opacity: 0 }}
                         whileInView={{ y: 0, opacity: 1 }}
                         viewport={{ once: true }}
-                        className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-700"
+                        className="lg:col-span-2 glass-card rounded-3xl p-8 sm:p-10"
                     >
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">About this Studio</h2>
+                        <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white mb-6">About this Studio</h2>
                         <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg mb-8">
                             Located at <span className="font-medium text-gray-900 dark:text-white">{studio.address}</span>.
-                            Experience premium recording facilities designed for educators.
+                            Experience premium recording facilities designed for educators, featuring state-of-the-art equipment and a comfortable environment.
                         </p>
 
-                        <div className="mb-8">
+                        <div className="mb-2">
                             <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                <FaCheckCircle className="text-green-500" /> Facilities & Amenities
+                                <FaCheckCircle className="text-brand-500" /> Facilities & Amenities
                             </h3>
                             <div className="flex flex-wrap gap-3">
                                 {studio.facilities.map((fac, idx) => (
-                                    <span key={idx} className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-full text-sm font-medium border border-indigo-100 dark:border-indigo-800">
+                                    <span key={idx} className="bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 px-4 py-2 rounded-xl text-sm font-medium border border-brand-100 dark:border-brand-800/50">
                                         {fac}
                                     </span>
                                 ))}
@@ -224,24 +225,24 @@ const StudioDetails = () => {
                         transition={{ delay: 0.1 }}
                         className="space-y-6"
                     >
-                        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
-                            <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-xl">Point of Contact</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                        <div className="glass-card rounded-3xl p-8">
+                            <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-xl font-display">Point of Contact</h3>
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 font-bold text-xl ring-2 ring-white dark:ring-gray-700 shadow-md">
                                         {studio.pocName ? studio.pocName.charAt(0) : 'U'}
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-gray-900 dark:text-white">{studio.pocName || 'N/A'}</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Studio Manager</p>
+                                        <p className="font-bold text-lg text-gray-900 dark:text-white">{studio.pocName || 'N/A'}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Studio Manager</p>
                                     </div>
                                 </div>
-                                <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
-                                    <p className="text-gray-600 dark:text-gray-300 flex items-center gap-3">
-                                        <span className="text-primary"><FaClock /></span> {studio.pocContact || 'N/A'}
+                                <div className="pt-6 border-t border-gray-100 dark:border-gray-700/50 space-y-3">
+                                    <p className="text-gray-600 dark:text-gray-300 flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl">
+                                        <span className="text-brand-500"><FaClock /></span> <span className="font-medium">{studio.pocContact || 'N/A'}</span>
                                     </p>
-                                    <p className="text-gray-600 dark:text-gray-300 flex items-center gap-3">
-                                        <span className="text-primary">@</span> {studio.pocEmail || 'N/A'}
+                                    <p className="text-gray-600 dark:text-gray-300 flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl">
+                                        <span className="text-brand-500">@</span> <span className="font-medium">{studio.pocEmail || 'N/A'}</span>
                                     </p>
                                 </div>
                             </div>
@@ -251,7 +252,7 @@ const StudioDetails = () => {
                             href={studio.googleMapLink || `https://www.google.com/maps/dir/?api=1&destination=${studio.lat || 28.6139},${studio.lng || 77.2090}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-4 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
+                            className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-4 rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all transform hover:-translate-y-1"
                         >
                             <FaMapMarkerAlt className="inline mr-2" /> Navigate to Studio
                         </a>
@@ -261,25 +262,25 @@ const StudioDetails = () => {
                 {/* 3. Album View Gallery Section */}
                 {(studio.exteriorPhotos?.length > 0 || studio.interiorPhotos?.length > 0) && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-700"
+                        className="glass-card rounded-3xl p-8 sm:p-10"
                     >
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <FaImages className="text-primary" /> Studio Album
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                            <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                <FaImages className="text-brand-500" /> Studio Album
                             </h2>
-                            <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-xl">
+                            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800/50 p-1.5 rounded-xl border border-gray-200 dark:border-gray-700/50">
                                 <button
                                     onClick={() => setActiveTab('interior')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'interior' ? 'bg-white dark:bg-gray-600 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
+                                    className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'interior' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                                 >
                                     Interior
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('exterior')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'exterior' ? 'bg-white dark:bg-gray-600 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
+                                    className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'exterior' ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                                 >
                                     Exterior
                                 </button>
@@ -294,18 +295,18 @@ const StudioDetails = () => {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: 20 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                                        transition={{ duration: 0.3 }}
+                                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
                                     >
                                         {studio.interiorPhotos?.length > 0 ? (
                                             studio.interiorPhotos.map((img, idx) => (
-                                                <div key={idx} className="group relative aspect-video rounded-xl overflow-hidden cursor-pointer">
-                                                    <img src={getImageUrl(img)} alt={`Interior ${idx}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                <div key={idx} className="group relative aspect-video rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all">
+                                                    <img src={getImageUrl(img)} alt={`Interior ${idx}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className="col-span-full text-center py-12 text-gray-500">No interior photos available.</div>
+                                            <div className="col-span-full text-center py-16 text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">No interior photos available.</div>
                                         )}
                                     </motion.div>
                                 )}
@@ -316,18 +317,18 @@ const StudioDetails = () => {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: 20 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                                        transition={{ duration: 0.3 }}
+                                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
                                     >
                                         {studio.exteriorPhotos?.length > 0 ? (
                                             studio.exteriorPhotos.map((img, idx) => (
-                                                <div key={idx} className="group relative aspect-video rounded-xl overflow-hidden cursor-pointer">
-                                                    <img src={getImageUrl(img)} alt={`Exterior ${idx}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                <div key={idx} className="group relative aspect-video rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all">
+                                                    <img src={getImageUrl(img)} alt={`Exterior ${idx}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className="col-span-full text-center py-12 text-gray-500">No exterior photos available.</div>
+                                            <div className="col-span-full text-center py-16 text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">No exterior photos available.</div>
                                         )}
                                     </motion.div>
                                 )}
@@ -337,43 +338,46 @@ const StudioDetails = () => {
                 )}
 
                 {/* 4. Booking Section */}
-                <div ref={bookingSectionRef} className="scroll-mt-24">
+                <div ref={bookingSectionRef} className="scroll-mt-28">
                     <motion.div
                         initial={{ y: 40, opacity: 0 }}
                         whileInView={{ y: 0, opacity: 1 }}
                         viewport={{ once: true }}
-                        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-2xl overflow-hidden"
+                        className="relative overflow-hidden rounded-3xl shadow-2xl bg-dark-card border border-dark-border"
                     >
-                        <div className="p-8 sm:p-12">
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/40 to-dark-bg z-0"></div>
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+
+                        <div className="relative z-10 p-8 sm:p-12 lg:p-16">
                             <div className="text-center mb-12">
-                                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to Record?</h2>
-                                <p className="text-gray-400 text-lg">Select a unit, date, and time slot to reserve your session.</p>
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-4">Ready to Record?</h2>
+                                <p className="text-gray-300 text-lg max-w-2xl mx-auto">Select your preferred studio unit, date, and time slot to instantly reserve your session.</p>
                             </div>
 
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                                 {/* Unit & Date Selection */}
                                 <div className="lg:col-span-1 space-y-8">
-                                    <div>
-                                        <label className="block text-lg font-medium text-gray-300 mb-4">
-                                            <FaBuilding className="inline mr-2 text-primary" /> Studio Unit
+                                    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                                        <label className="block text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                            <FaBuilding className="text-brand-400" /> Studio Unit
                                         </label>
                                         <button
                                             onClick={() => setShowUnitModal(true)}
-                                            className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white py-4 px-6 rounded-2xl flex justify-between items-center transition-all group"
+                                            className="w-full bg-white/10 hover:bg-white/20 border border-white/10 text-white py-4 px-6 rounded-xl flex justify-between items-center transition-all group"
                                         >
-                                            <span className="font-bold text-lg">{selectedUnit || 'Select a Unit'}</span>
-                                            <span className="bg-primary/20 text-primary px-3 py-1 rounded-lg text-sm group-hover:bg-primary group-hover:text-white transition-colors">Change</span>
+                                            <span className="font-bold text-xl">{selectedUnit || 'Select a Unit'}</span>
+                                            <span className="bg-brand-500/20 text-brand-300 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider group-hover:bg-brand-500 group-hover:text-white transition-colors">Change</span>
                                         </button>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-lg font-medium text-gray-300 mb-4">
-                                            <FaCalendarAlt className="inline mr-2 text-primary" /> Select Date
+                                    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                                        <label className="block text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                            <FaCalendarAlt className="text-brand-400" /> Select Date
                                         </label>
                                         <input
                                             type="date"
                                             required
-                                            className="w-full border border-gray-700 rounded-2xl px-6 py-4 bg-gray-800 text-white text-lg focus:ring-2 focus:ring-primary focus:outline-none transition-shadow shadow-inner"
+                                            className="w-full border border-white/10 rounded-xl px-6 py-4 bg-white/10 text-white text-lg focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all placeholder-gray-400"
                                             value={date}
                                             min={new Date().toISOString().split('T')[0]}
                                             onChange={(e) => {
@@ -385,41 +389,47 @@ const StudioDetails = () => {
                                 </div>
 
                                 {/* Slot Selection */}
-                                <div className="lg:col-span-2 space-y-4">
-                                    <label className="block text-lg font-medium text-gray-300 mb-2">
-                                        <FaClock className="inline mr-2 text-primary" /> Available Slots {selectedUnit && `for ${selectedUnit}`}
-                                    </label>
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                                        {slots.map((hour) => {
-                                            const isBooked = bookedSlots.includes(hour);
-                                            const isSelected = selectedSlot === hour;
-                                            const timeLabel = `${hour.toString().padStart(2, '0')}:00`;
+                                <div className="lg:col-span-2 space-y-6">
+                                    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 h-full">
+                                        <label className="block text-lg font-bold text-white mb-6 flex items-center gap-2">
+                                            <FaClock className="text-brand-400" /> Available Slots {selectedUnit && <span className="text-gray-400 font-normal ml-1">for {selectedUnit}</span>}
+                                        </label>
 
-                                            return (
-                                                <button
-                                                    key={hour}
-                                                    disabled={isBooked || !selectedUnit}
-                                                    onClick={() => setSelectedSlot(hour)}
-                                                    className={`
-                                                        py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200
-                                                        ${!selectedUnit
-                                                            ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50'
-                                                            : isBooked
-                                                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700'
-                                                                : isSelected
-                                                                    ? 'bg-primary text-white shadow-lg transform scale-105 ring-2 ring-primary ring-offset-2 ring-offset-gray-900'
-                                                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white border border-gray-600'
-                                                        }
-                                                    `}
-                                                >
-                                                    {timeLabel}
-                                                </button>
-                                            );
-                                        })}
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                                            {slots.map((hour) => {
+                                                const isBooked = bookedSlots.includes(hour);
+                                                const isSelected = selectedSlot === hour;
+                                                const timeLabel = `${hour.toString().padStart(2, '0')}:00`;
+
+                                                return (
+                                                    <button
+                                                        key={hour}
+                                                        disabled={isBooked || !selectedUnit}
+                                                        onClick={() => setSelectedSlot(hour)}
+                                                        className={`
+                                                            py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 relative overflow-hidden
+                                                            ${!selectedUnit
+                                                                ? 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/5'
+                                                                : isBooked
+                                                                    ? 'bg-red-900/20 text-red-400 cursor-not-allowed border border-red-900/30'
+                                                                    : isSelected
+                                                                        ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/40 transform scale-105 border border-brand-500'
+                                                                        : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white border border-white/10'
+                                                            }
+                                                        `}
+                                                    >
+                                                        {timeLabel}
+                                                        {isBooked && <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]"><FaTimes className="text-red-500" /></div>}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        {!selectedUnit && (
+                                            <div className="mt-8 p-4 bg-yellow-900/20 border border-yellow-700/30 rounded-xl text-yellow-200 text-center text-sm font-medium">
+                                                Please select a studio unit from the left panel to view availability.
+                                            </div>
+                                        )}
                                     </div>
-                                    {!selectedUnit && (
-                                        <p className="text-yellow-500 text-sm mt-2">* Please select a studio unit first.</p>
-                                    )}
                                 </div>
                             </div>
 
@@ -427,7 +437,7 @@ const StudioDetails = () => {
                                 <button
                                     onClick={handleBook}
                                     disabled={loading || !selectedSlot || !selectedUnit}
-                                    className="w-full sm:w-auto min-w-[300px] bg-gradient-to-r from-primary to-indigo-500 text-white py-4 px-12 rounded-2xl font-bold text-xl hover:from-indigo-500 hover:to-primary transition-all shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1"
+                                    className="w-full sm:w-auto min-w-[320px] bg-gradient-to-r from-brand-600 to-accent text-white py-4 px-12 rounded-2xl font-bold text-xl hover:from-brand-500 hover:to-brand-400 transition-all shadow-xl shadow-brand-900/50 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1 hover:scale-[1.02]"
                                 >
                                     {loading ? 'Processing...' : 'Confirm Booking'}
                                 </button>
@@ -446,18 +456,18 @@ const StudioDetails = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/70 backdrop-blur-md"
                             onClick={() => setShowUnitModal(false)}
                         />
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden"
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="relative glass-card rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/20"
                         >
-                            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                            <div className="p-6 border-b border-gray-100 dark:border-gray-700/50 flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <FaDoorOpen className="text-primary" /> Select Studio Unit
+                                    <FaDoorOpen className="text-brand-500" /> Select Studio Unit
                                 </h3>
                                 <button
                                     onClick={() => setShowUnitModal(false)}
@@ -466,7 +476,7 @@ const StudioDetails = () => {
                                     <FaTimes />
                                 </button>
                             </div>
-                            <div className="p-6 max-h-[60vh] overflow-y-auto">
+                            <div className="p-6 max-h-[60vh] overflow-y-auto bg-white/30 dark:bg-gray-900/30">
                                 <div className="grid grid-cols-2 gap-4">
                                     {studio.studioNumbers && studio.studioNumbers.map((unit) => (
                                         <button
@@ -477,15 +487,16 @@ const StudioDetails = () => {
                                                 setShowUnitModal(false);
                                             }}
                                             className={`
-                                                p-4 rounded-2xl border-2 transition-all text-center
+                                                p-5 rounded-2xl border-2 transition-all text-center group relative overflow-hidden
                                                 ${selectedUnit === unit
-                                                    ? 'border-primary bg-primary/5 text-primary shadow-md'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-primary/50 text-gray-700 dark:text-gray-300'
+                                                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 shadow-lg'
+                                                    : 'border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800'
                                                 }
                                             `}
                                         >
                                             <span className="block text-xs font-bold uppercase tracking-wider opacity-60 mb-1">Unit</span>
-                                            <span className="text-lg font-bold">{unit}</span>
+                                            <span className="text-2xl font-display font-bold">{unit}</span>
+                                            {selectedUnit === unit && <div className="absolute inset-0 bg-brand-500/5 dark:bg-brand-400/5" />}
                                         </button>
                                     ))}
                                 </div>
@@ -496,6 +507,7 @@ const StudioDetails = () => {
             </AnimatePresence>
         </motion.div>
     );
+
 };
 
 export default StudioDetails;
