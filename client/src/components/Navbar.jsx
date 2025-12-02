@@ -9,16 +9,17 @@ import ThemeToggle from './ThemeToggle';
 import {
     FaMapMarkerAlt, FaChevronDown, FaSearch, FaLocationArrow,
     FaLandmark, FaBuilding, FaLaptopCode, FaCity, FaBars, FaTimes,
-    FaCalendarAlt, FaUserShield, FaSignOutAlt, FaUser, FaGlobe
+    FaCalendarAlt, FaUserShield, FaSignOutAlt, FaUser, FaGlobe, FaFilter
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../utils/apiConfig';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
-    const { selectedCity, setSelectedCity, detectLocation, locationLoading, searchKeyword, setSearchKeyword } = useLocationContext();
+    const { selectedCity, setSelectedCity, detectLocation, locationLoading, searchKeyword, setSearchKeyword, filters, setFilters } = useLocationContext();
     const navigate = useNavigate();
     const [showCityModal, setShowCityModal] = useState(false);
+    const [showFilterModal, setShowFilterModal] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
     const [cities, setCities] = useState([]);
     const [loadingCities, setLoadingCities] = useState(false);
@@ -133,62 +134,54 @@ const Navbar = () => {
 
                         {/* Center: Search Bar */}
                         {user && (
-                            <div className="flex-1 max-w-2xl mx-4 relative">
-                                <div className="relative group">
-                                    <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
+                            <div className="flex-1 max-w-2xl mx-4 flex items-center gap-2 relative z-50">
+                                <div className="relative hidden md:block w-full">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <FaSearch className="text-gray-400" />
+                                    </div>
                                     <input
                                         type="text"
-                                        placeholder="Search studios..."
-                                        className="w-full pl-11 pr-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                                         value={searchKeyword}
                                         onChange={(e) => setSearchKeyword(e.target.value)}
-                                        onFocus={() => {
-                                            if (suggestions.length > 0) setShowSuggestions(true);
-                                        }}
+                                        onFocus={() => setShowSuggestions(true)}
                                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                        placeholder="Search studios..."
+                                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm transition-colors duration-200"
                                     />
+                                    <AnimatePresence>
+                                        {showSuggestions && suggestions.length > 0 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden"
+                                            >
+                                                {suggestions.map((studio) => (
+                                                    <Link
+                                                        key={studio._id}
+                                                        to={`/studios/${studio._id}`}
+                                                        className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                                                    >
+                                                        <div className="font-medium text-gray-900 dark:text-white">{studio.name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{studio.city}</div>
+                                                    </Link>
+                                                ))}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
-                                {/* Search Suggestions Dropdown */}
-                                <AnimatePresence>
-                                    {showSuggestions && suggestions.length > 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50"
-                                        >
-                                            {suggestions.map((studio) => (
-                                                <div
-                                                    key={studio._id}
-                                                    onClick={() => {
-                                                        navigate(`/studios/${studio._id}`);
-                                                        setSearchKeyword('');
-                                                        setShowSuggestions(false);
-                                                    }}
-                                                    className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-50 dark:border-gray-700/50 last:border-0"
-                                                >
-                                                    <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
-                                                        {studio.coverPhoto ? (
-                                                            <img src={studio.coverPhoto.startsWith('http') || studio.coverPhoto.startsWith('/assets') ? studio.coverPhoto : `${API_BASE_URL}${studio.coverPhoto}`} alt={studio.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-400"><FaBuilding /></div>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{studio.name}</h4>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{studio.city}, {studio.area}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                <button
+                                    onClick={() => setShowFilterModal(true)}
+                                    className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                                    title="Advanced Filters"
+                                >
+                                    <FaFilter />
+                                </button>
                             </div>
                         )}
 
                         {/* Right: Theme Toggle & Hamburger */}
                         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-
                             <button
                                 onClick={() => setShowSidebar(true)}
                                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
@@ -382,6 +375,127 @@ const Navbar = () => {
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Filter Modal */}
+            <AnimatePresence>
+                {showFilterModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Filters</h3>
+                                <button onClick={() => setShowFilterModal(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                {/* Distance Filter */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Distance Range</label>
+                                    <div className="flex gap-2">
+                                        {[
+                                            { label: '< 5km', min: 0, max: 5 },
+                                            { label: '5-10km', min: 5, max: 10 },
+                                            { label: '> 10km', min: 10, max: 5000 }
+                                        ].map((range) => (
+                                            <button
+                                                key={range.label}
+                                                onClick={() => setFilters({ ...filters, minDistance: range.min, maxDistance: range.max })}
+                                                className={`px-3 py-1.5 rounded-lg text-sm border ${filters.minDistance === range.min && filters.maxDistance === range.max
+                                                        ? 'bg-primary text-white border-primary'
+                                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+                                                    }`}
+                                            >
+                                                {range.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Availability Filter */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Availability</label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input
+                                            type="date"
+                                            value={filters.date}
+                                            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                        />
+                                        <input
+                                            type="time"
+                                            value={filters.time}
+                                            onChange={(e) => setFilters({ ...filters, time: e.target.value })}
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Num Studios */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Min Studios</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={filters.numStudios}
+                                        onChange={(e) => setFilters({ ...filters, numStudios: parseInt(e.target.value) || 0 })}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+
+                                {/* Facilities */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Facilities</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Wi-Fi', 'Parking', 'AC', 'Green Screen', 'Soundproof'].map((facility) => (
+                                            <button
+                                                key={facility}
+                                                onClick={() => {
+                                                    const newFacilities = filters.facilities.includes(facility)
+                                                        ? filters.facilities.filter(f => f !== facility)
+                                                        : [...filters.facilities, facility];
+                                                    setFilters({ ...filters, facilities: newFacilities });
+                                                }}
+                                                className={`px-3 py-1.5 rounded-lg text-sm border ${filters.facilities.includes(facility)
+                                                        ? 'bg-primary text-white border-primary'
+                                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+                                                    }`}
+                                            >
+                                                {facility}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+                                <button
+                                    onClick={() => setFilters({
+                                        minDistance: 0,
+                                        maxDistance: 5000,
+                                        date: '',
+                                        time: '',
+                                        numStudios: 0,
+                                        facilities: []
+                                    })}
+                                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                >
+                                    Reset
+                                </button>
+                                <button
+                                    onClick={() => setShowFilterModal(false)}
+                                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700"
+                                >
+                                    Apply Filters
+                                </button>
                             </div>
                         </motion.div>
                     </div>

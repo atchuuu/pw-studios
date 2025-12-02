@@ -1,11 +1,11 @@
 const asyncHandler = require('express-async-handler');
-const { Studio } = require('../models');
+const { Studio, Booking } = require('../models');
 
 // @desc    Get all studios
 // @route   GET /api/studios
 // @access  Private
 const getStudios = asyncHandler(async (req, res) => {
-    const { keyword, city, minCapacity, facilities, sort, lat, lng } = req.query;
+    const { keyword, city, minCapacity, facilities, sort, lat, lng, minDistance, maxDistance, numStudios, date, time } = req.query;
 
     let query = {};
 
@@ -21,6 +21,10 @@ const getStudios = asyncHandler(async (req, res) => {
         query.capacity = { $gte: Number(minCapacity) };
     }
 
+    if (numStudios) {
+        query.numStudios = { $gte: Number(numStudios) };
+    }
+
     if (facilities) {
         const facilitiesArray = facilities.split(',');
         query.facilities = { $all: facilitiesArray };
@@ -33,7 +37,8 @@ const getStudios = asyncHandler(async (req, res) => {
                     type: "Point",
                     coordinates: [parseFloat(lng), parseFloat(lat)]
                 },
-                $maxDistance: 5000000 // 5000km radius, adjust as needed
+                $minDistance: minDistance ? Number(minDistance) * 1000 : 0,
+                $maxDistance: maxDistance ? Number(maxDistance) * 1000 : 5000000 // Default 5000km
             }
         };
     }
@@ -53,6 +58,34 @@ const getStudios = asyncHandler(async (req, res) => {
     } else {
         studios = await Studio.find(query).sort(sortOption);
     }
+
+    // Availability Filter
+    if (date && time) {
+        const queryDate = new Date(`${date}T${time}`);
+        const queryEndTime = new Date(queryDate.getTime() + 60 * 60 * 1000); // Assume 1 hour slot
+
+        // Find conflicting bookings
+        const conflictingBookings = await Booking.find({
+            status: 'confirmed',
+            $or: [
+                { startTime: { $lt: queryEndTime }, endTime: { $gt: queryDate } }
+            ]
+        });
+
+        // Count booked units per studio
+        const bookedCounts = {};
+        conflictingBookings.forEach(booking => {
+            const studioId = booking.studio.toString();
+            bookedCounts[studioId] = (bookedCounts[studioId] || 0) + 1;
+        });
+
+        // Filter studios
+        studios = studios.filter(studio => {
+            const bookedUnits = bookedCounts[studio._id.toString()] || 0;
+            return studio.numStudios > bookedUnits;
+        });
+    }
+
     res.json(studios);
 });
 
@@ -130,10 +163,6 @@ const createStudio = asyncHandler(async (req, res) => {
     const createdStudio = await studio.save();
     res.status(201).json(createdStudio);
 });
-
-// @desc    Get top 3 nearest studios
-// @route   GET /api/studios/recommendations
-// @access  Private
 const getRecommendations = asyncHandler(async (req, res) => {
     const { lat, lng } = req.query;
 

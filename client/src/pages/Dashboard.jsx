@@ -10,7 +10,7 @@ import defaultCover from '../assets/profile-banner.png';
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const { selectedCity, setSelectedCity, userLocation, isNearMe, searchKeyword, setSearchKeyword } = useLocationContext();
+    const { selectedCity, setSelectedCity, userLocation, isNearMe, searchKeyword, setSearchKeyword, filters } = useLocationContext();
     const [studios, setStudios] = useState([]);
 
     useEffect(() => {
@@ -18,32 +18,34 @@ const Dashboard = () => {
             try {
                 const config = { headers: { Authorization: `Bearer ${user.token}` } };
 
-                if (isNearMe && userLocation) {
-                    // Fetch nearest studios
-                    const recRes = await axios.get(`${API_BASE_URL}/studios/recommendations?lat=${userLocation.lat}&lng=${userLocation.lng}`, config);
-                    setStudios(Array.isArray(recRes.data) ? recRes.data : []);
+                let query = `?keyword=${searchKeyword}`;
+
+                // Add filters
+                if (filters.minDistance !== undefined) query += `&minDistance=${filters.minDistance}`;
+                if (filters.maxDistance !== undefined) query += `&maxDistance=${filters.maxDistance}`;
+                if (filters.numStudios > 0) query += `&numStudios=${filters.numStudios}`;
+                if (filters.facilities && filters.facilities.length > 0) query += `&facilities=${filters.facilities.join(',')}`;
+                if (filters.date) query += `&date=${filters.date}`;
+                if (filters.time) query += `&time=${filters.time}`;
+
+                if (userLocation && userLocation.lat && userLocation.lng) {
+                    query += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
                 } else {
-                    // Fetch normal filtered list
-                    let query = `?keyword=${searchKeyword}`;
-                    if (userLocation && userLocation.lat && userLocation.lng) {
-                        query += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
-                    } else {
-                        query += `&sort=city`;
-                    }
-
-                    if (selectedCity && selectedCity !== 'Near Me') {
-                        query += `&city=${selectedCity}`;
-                    }
-
-                    const studioRes = await axios.get(`${API_BASE_URL}/studios${query}`, config);
-                    setStudios(Array.isArray(studioRes.data) ? studioRes.data : []);
+                    query += `&sort=city`;
                 }
+
+                if (selectedCity && selectedCity !== 'Near Me') {
+                    query += `&city=${selectedCity}`;
+                }
+
+                const studioRes = await axios.get(`${API_BASE_URL}/studios${query}`, config);
+                setStudios(Array.isArray(studioRes.data) ? studioRes.data : []);
             } catch (error) {
                 console.error(error);
             }
         };
         if (user) fetchData();
-    }, [user, searchKeyword, selectedCity, userLocation, isNearMe]);
+    }, [user, searchKeyword, selectedCity, userLocation, isNearMe, filters]);
 
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         if (!lat1 || !lon1 || !lat2 || !lon2) return null;

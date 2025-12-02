@@ -14,6 +14,14 @@ export const LocationProvider = ({ children }) => {
     const [locationError, setLocationError] = useState(null);
 
     const [searchKeyword, setSearchKeyword] = useState('');
+    const [filters, setFilters] = useState({
+        minDistance: 0,
+        maxDistance: 5000, // Default to max range
+        date: '',
+        time: '',
+        numStudios: 0,
+        facilities: []
+    });
 
     // Always default to Near Me (detect location) on mount/refresh
     // Removed auto-detect on mount to prevent "User denied" errors if permission wasn't granted yet
@@ -76,7 +84,10 @@ export const LocationProvider = ({ children }) => {
         locationLoading,
         locationError,
         searchKeyword,
-        setSearchKeyword
+        searchKeyword,
+        setSearchKeyword,
+        filters,
+        setFilters
     };
 
     return (
