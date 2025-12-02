@@ -28,7 +28,7 @@ const EditStudio = () => {
         facilities: '',
         interiorPhotos: '',
         exteriorPhotos: '',
-        coverPhoto: ''
+        coverPhoto: '/assets/profile-banner.png'
     });
 
     useEffect(() => {
@@ -52,7 +52,7 @@ const EditStudio = () => {
                     facilities: data.facilities ? data.facilities.join(', ') : '',
                     interiorPhotos: data.interiorPhotos ? data.interiorPhotos.join(', ') : '',
                     exteriorPhotos: data.exteriorPhotos ? data.exteriorPhotos.join(', ') : '',
-                    coverPhoto: data.coverPhoto || ''
+                    coverPhoto: data.coverPhoto || '/assets/profile-banner.png'
                 });
             } catch (error) {
                 console.error("Failed to fetch studio", error);
@@ -64,6 +64,13 @@ const EditStudio = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    // Helper for image URLs
+    const getImageUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http') || url.startsWith('/assets')) return url;
+        return `${API_BASE_URL}${url}`;
     };
 
     const handleImageUpload = async (e, type) => {
@@ -313,11 +320,11 @@ const EditStudio = () => {
                                     value={formData.coverPhoto || ''}
                                     onChange={handleChange}
                                     className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
-                                    placeholder="https://example.com/cover.jpg"
+                                    placeholder="/assets/profile-banner.png"
                                 />
                                 {formData.coverPhoto && (
                                     <div className="mt-2 relative w-full h-48 rounded-lg overflow-hidden">
-                                        <img src={formData.coverPhoto.startsWith('http') ? formData.coverPhoto : `${API_BASE_URL}${formData.coverPhoto}`} alt="Cover Preview" className="w-full h-full object-cover" />
+                                        <img src={getImageUrl(formData.coverPhoto)} alt="Cover Preview" className="w-full h-full object-cover" />
                                     </div>
                                 )}
                             </div>

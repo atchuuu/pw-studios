@@ -18,17 +18,13 @@ export const LocationProvider = ({ children }) => {
     // Always default to Near Me (detect location) on mount/refresh
     // Removed auto-detect on mount to prevent "User denied" errors if permission wasn't granted yet
     // and to ensure the prompt only appears when the user explicitly requests it.
+    // Automatically try to detect location on mount
     useEffect(() => {
-        // Optional: Check if we already have a saved city preference
-        const savedCity = localStorage.getItem('pw_studios_city');
-        if (savedCity) {
-            setSelectedCity(savedCity);
-            if (savedCity === 'Near Me') {
-                // If they previously chose Near Me, we *could* try to detect, 
-                // but let's wait for them to click or just show the last known state if we persisted coords (we didn't).
-                // So just set it to 'Near Me' and let them re-trigger if needed, or maybe just default to empty/all.
-            }
-        }
+        detectLocation().catch(err => {
+            // Silently fail on auto-detect if permission denied or other error
+            // The user can manually retry via the Navbar button which shows toast errors
+            console.log("Auto-detect location failed:", err.message);
+        });
     }, []);
 
     const updateCity = (city) => {

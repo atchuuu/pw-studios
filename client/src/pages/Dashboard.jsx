@@ -25,6 +25,12 @@ const Dashboard = () => {
                 } else {
                     // Fetch normal filtered list
                     let query = `?keyword=${searchKeyword}`;
+                    if (userLocation && userLocation.lat && userLocation.lng) {
+                        query += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
+                    } else {
+                        query += `&sort=city`;
+                    }
+
                     if (selectedCity && selectedCity !== 'Near Me') {
                         query += `&city=${selectedCity}`;
                     }
@@ -125,7 +131,7 @@ const Dashboard = () => {
                                 >
                                     <div className="relative h-48 overflow-hidden">
                                         <img
-                                            src={studio.coverPhoto ? (studio.coverPhoto.startsWith('http') ? studio.coverPhoto : `${API_BASE_URL}${studio.coverPhoto}`) : defaultCover}
+                                            src={studio.coverPhoto ? (studio.coverPhoto.startsWith('http') || studio.coverPhoto.startsWith('/assets') ? studio.coverPhoto : `${API_BASE_URL}${studio.coverPhoto}`) : defaultCover}
                                             alt={studio.name}
                                             loading="lazy"
                                             decoding="async"

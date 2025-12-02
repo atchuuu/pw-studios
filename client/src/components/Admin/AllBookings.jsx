@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-import { motion } from 'framer-motion';
-import { FaSearch, FaFilter } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaSearch, FaFilter, FaChevronDown, FaChevronUp, FaMapMarkerAlt, FaCalendarAlt, FaClock, FaUser, FaList, FaThLarge } from 'react-icons/fa';
 import { API_BASE_URL } from '../../utils/apiConfig';
 
 const AllBookings = () => {
     const { user } = useAuth();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
     const [filters, setFilters] = useState({
         user: '',
         location: '',
         date: ''
     });
+    const [expandedStudios, setExpandedStudios] = useState({});
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -26,6 +28,12 @@ const AllBookings = () => {
 
                 const { data } = await axios.get(`${API_BASE_URL}/bookings${query}`, config);
                 setBookings(data);
+
+                // Initialize all studios as expanded by default
+                const studioIds = [...new Set(data.map(b => b.studio?._id))];
+                const initialExpanded = {};
+                studioIds.forEach(id => initialExpanded[id] = true);
+                setExpandedStudios(initialExpanded);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -61,57 +69,99 @@ const AllBookings = () => {
         }
     };
 
+    const toggleStudio = (studioId) => {
+        setExpandedStudios(prev => ({
+            ...prev,
+            [studioId]: !prev[studioId]
+        }));
+    };
+
+    // Group bookings by Studio
+    const groupedBookings = bookings.reduce((acc, booking) => {
+        const studioId = booking.studio?._id || 'unknown';
+        const studioName = booking.studio?.name || 'Unknown Studio';
+        const studioLocation = booking.studio?.location || '';
+
+        if (!acc[studioId]) {
+            acc[studioId] = {
+                id: studioId,
+                name: studioName,
+                location: studioLocation,
+                bookings: []
+            };
+        }
+        acc[studioId].bookings.push(booking);
+        return acc;
+    }, {});
+
+    // Calendar View Logic
+    const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+
+    const getBookingsForDay = (day) => {
+        return bookings.filter(b => {
+            const d = new Date(b.startTime);
+            return d.getDate() === day && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        });
+    };
+
     if (loading && bookings.length === 0) return <div className="p-10 text-center text-gray-500">Loading bookings...</div>;
 
     return (
         <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">All Bookings</h2>
-
-            {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2 mb-4 text-gray-700 dark:text-gray-300">
-                    <FaFilter />
-                    <span className="font-medium">Filters</span>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div className="flex items-center gap-4">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">All Bookings</h2>
+                    <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-primary' : 'text-gray-500 dark:text-gray-400'}`}
+                            title="List View"
+                        >
+                            <FaList />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('calendar')}
+                            className={`p-2 rounded-md transition-all ${viewMode === 'calendar' ? 'bg-white dark:bg-gray-600 shadow-sm text-primary' : 'text-gray-500 dark:text-gray-400'}`}
+                            title="Calendar View"
+                        >
+                            <FaThLarge />
+                        </button>
+                    </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">User (Name/Email)</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <FaSearch className="text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                name="user"
-                                placeholder="Search user..."
-                                className="pl-10 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
-                                value={filters.user}
-                                onChange={handleFilterChange}
-                            />
-                        </div>
+
+                {/* Filters */}
+                <div className="flex flex-wrap gap-3 w-full md:w-auto">
+                    <div className="relative flex-1 md:flex-none">
+                        <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="text"
+                            name="user"
+                            placeholder="Search user..."
+                            className="pl-9 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                            value={filters.user}
+                            onChange={handleFilterChange}
+                        />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location (Studio/City)</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <FaSearch className="text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                name="location"
-                                placeholder="Search location..."
-                                className="pl-10 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
-                                value={filters.location}
-                                onChange={handleFilterChange}
-                            />
-                        </div>
+                    <div className="relative flex-1 md:flex-none">
+                        <FaMapMarkerAlt className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="text"
+                            name="location"
+                            placeholder="Filter location..."
+                            className="pl-9 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                            value={filters.location}
+                            onChange={handleFilterChange}
+                        />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                    <div className="relative flex-1 md:flex-none">
                         <input
                             type="date"
                             name="date"
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none"
+                            className="pl-3 pr-4 py-2 w-full border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                             value={filters.date}
                             onChange={handleFilterChange}
                         />
@@ -119,83 +169,142 @@ const AllBookings = () => {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg border border-gray-200 dark:border-gray-700">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead className="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Studio
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    User
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Time
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Status
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            {bookings.map((booking) => (
-                                <motion.tr
-                                    key={booking._id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{booking.studio?.name || 'Unknown Studio'}</div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">{booking.studio?.location}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900 dark:text-white">{booking.user?.name || 'Unknown User'}</div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">{booking.user?.email}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900 dark:text-white">
-                                            {new Date(booking.startTime).toLocaleDateString()}
+            {viewMode === 'list' ? (
+                <div className="space-y-6">
+                    {Object.values(groupedBookings).map((group) => (
+                        <div key={group.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                            <div
+                                className="p-4 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                onClick={() => toggleStudio(group.id)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                        <FaMapMarkerAlt />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 dark:text-white">{group.name}</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{group.location} • {group.bookings.length} Bookings</p>
+                                    </div>
+                                </div>
+                                <div className="text-gray-400">
+                                    {expandedStudios[group.id] ? <FaChevronUp /> : <FaChevronDown />}
+                                </div>
+                            </div>
+
+                            <AnimatePresence>
+                                {expandedStudios[group.id] && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="overflow-x-auto">
+                                            <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                                                <thead className="bg-white dark:bg-gray-800">
+                                                    <tr>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date & Time</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                                    {group.bookings.map((booking) => (
+                                                        <tr key={booking._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="flex items-center">
+                                                                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 text-xs font-bold">
+                                                                        {booking.user?.name?.charAt(0) || <FaUser />}
+                                                                    </div>
+                                                                    <div className="ml-3">
+                                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{booking.user?.name || 'Unknown'}</div>
+                                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{booking.user?.email}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="flex flex-col text-sm text-gray-900 dark:text-white">
+                                                                    <span className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs mb-1">
+                                                                        <FaCalendarAlt size={10} /> {new Date(booking.startTime).toLocaleDateString()}
+                                                                    </span>
+                                                                    <span className="flex items-center gap-2 font-medium">
+                                                                        <FaClock size={10} className="text-primary" />
+                                                                        {new Date(booking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
+                                                                        {new Date(booking.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className={`px-2.5 py-0.5 inline-flex text-xs font-medium rounded-full border ${booking.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                                        booking.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                                            'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                                    }`}>
+                                                                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                                {booking.status === 'confirmed' && (
+                                                                    <button
+                                                                        onClick={() => handleCancelBooking(booking._id)}
+                                                                        className="text-red-600 hover:text-red-800 font-medium text-xs hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors border border-red-100"
+                                                                    >
+                                                                        Cancel Booking
+                                                                    </button>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900 dark:text-white">
-                                            {new Date(booking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
-                                            {new Date(booking.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-3">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                                booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                                                }`}>
-                                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                                            </span>
-                                            {booking.status === 'confirmed' && (
-                                                <button
-                                                    onClick={() => handleCancelBooking(booking._id)}
-                                                    className="text-xs text-red-600 hover:text-red-800 font-medium hover:underline"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </motion.tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+
+                    {bookings.length === 0 && (
+                        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+                            <div className="text-gray-400 mb-3 text-4xl">📅</div>
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">No bookings found</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Try adjusting your filters to see more results.</p>
+                        </div>
+                    )}
                 </div>
-                {bookings.length === 0 && (
-                    <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-                        No bookings found matching your filters.
+            ) : (
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
+                        {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    <div className="grid grid-cols-7 gap-2">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                            <div key={day} className="text-center text-xs font-semibold text-gray-500 dark:text-gray-400 py-2">
+                                {day}
+                            </div>
+                        ))}
+                        {Array.from({ length: daysInMonth }).map((_, i) => {
+                            const day = i + 1;
+                            const dayBookings = getBookingsForDay(day);
+                            return (
+                                <div key={day} className="min-h-[100px] border border-gray-100 dark:border-gray-700 rounded-lg p-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{day}</div>
+                                    <div className="space-y-1">
+                                        {dayBookings.slice(0, 3).map(b => (
+                                            <div key={b._id} className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded truncate" title={`${b.studio?.name} - ${b.user?.name}`}>
+                                                {new Date(b.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        ))}
+                                        {dayBookings.length > 3 && (
+                                            <div className="text-[10px] text-gray-400 text-center">+{dayBookings.length - 3} more</div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 };

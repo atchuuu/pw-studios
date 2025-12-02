@@ -90,7 +90,7 @@ const UserProfile = () => {
                             <div className="w-32 h-32 rounded-full bg-white dark:bg-gray-800 p-1 shadow-xl mx-auto relative group">
                                 {user.profilePicture ? (
                                     <img
-                                        src={user.profilePicture.startsWith('http') ? user.profilePicture : `${import.meta.env.VITE_SERVER_URL}${user.profilePicture}`}
+                                        src={user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/assets') ? user.profilePicture : `${import.meta.env.VITE_SERVER_URL}${user.profilePicture}`}
                                         alt={user.name}
                                         className="w-full h-full rounded-full object-cover"
                                     />

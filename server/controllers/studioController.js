@@ -33,7 +33,7 @@ const getStudios = asyncHandler(async (req, res) => {
                     type: "Point",
                     coordinates: [parseFloat(lng), parseFloat(lat)]
                 },
-                $maxDistance: 100000 // 100km radius, adjust as needed
+                $maxDistance: 5000000 // 5000km radius, adjust as needed
             }
         };
     }
@@ -43,6 +43,8 @@ const getStudios = asyncHandler(async (req, res) => {
         sortOption.name = 1;
     } else if (sort === 'capacity') {
         sortOption.capacity = -1; // Descending
+    } else if (sort === 'city') {
+        sortOption.city = 1; // Ascending
     }
 
     const studios = await Studio.find(query).sort(sortOption);
@@ -83,8 +85,11 @@ const generateUniqueStudioCode = async (city) => {
 // @desc    Create a studio
 // @route   POST /api/studios
 // @access  Private/Admin
+// @desc    Create a studio
+// @route   POST /api/studios
+// @access  Private/Admin
 const createStudio = asyncHandler(async (req, res) => {
-    const { name, address, city, area, lat, lng, numStudios, interiorPhotos, exteriorPhotos, pocEmail } = req.body;
+    const { name, address, city, area, lat, lng, numStudios, interiorPhotos, exteriorPhotos, pocEmail, googleMapLink, facilities } = req.body;
 
     const studioCode = await generateUniqueStudioCode(city);
 
@@ -108,11 +113,12 @@ const createStudio = asyncHandler(async (req, res) => {
         numStudios: numStudios || 1,
         studioCode,
         studioNumbers,
-        studioNumbers,
         interiorPhotos: interiorPhotos || [],
         exteriorPhotos: exteriorPhotos || [],
-        coverPhoto: req.body.coverPhoto || '',
+        coverPhoto: req.body.coverPhoto || '/assets/profile-banner.png',
         pocEmail: pocEmail || '',
+        googleMapLink: googleMapLink || '',
+        facilities: facilities || [],
         user: req.user._id,
     });
 
@@ -140,7 +146,7 @@ const getRecommendations = asyncHandler(async (req, res) => {
                         coordinates: [parseFloat(lng), parseFloat(lat)]
                     },
                     distanceField: "distance",
-                    maxDistance: 100000, // 100km
+                    maxDistance: 5000000, // 5000km
                     spherical: true,
                     key: "coordinates" // Explicitly specify the index key
                 }
@@ -209,11 +215,27 @@ const getStudioCities = asyncHandler(async (req, res) => {
     res.json(cities.filter(city => city)); // Filter out null/undefined
 });
 
+// @desc    Delete studio
+// @route   DELETE /api/studios/:id
+// @access  Private/Admin
+const deleteStudio = asyncHandler(async (req, res) => {
+    const studio = await Studio.findById(req.params.id);
+
+    if (studio) {
+        await studio.deleteOne();
+        res.json({ message: 'Studio removed' });
+    } else {
+        res.status(404);
+        throw new Error('Studio not found');
+    }
+});
+
 module.exports = {
     getStudios,
     getStudioById,
     createStudio,
     updateStudio,
+    deleteStudio,
     getRecommendations,
     getStudioCities
 };

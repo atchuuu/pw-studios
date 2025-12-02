@@ -9,7 +9,7 @@ import ThemeToggle from './ThemeToggle';
 import {
     FaMapMarkerAlt, FaChevronDown, FaSearch, FaLocationArrow,
     FaLandmark, FaBuilding, FaLaptopCode, FaCity, FaBars, FaTimes,
-    FaCalendarAlt, FaUserShield, FaSignOutAlt, FaUser
+    FaCalendarAlt, FaUserShield, FaSignOutAlt, FaUser, FaGlobe
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../utils/apiConfig';
@@ -22,6 +22,8 @@ const Navbar = () => {
     const [showSidebar, setShowSidebar] = useState(false);
     const [cities, setCities] = useState([]);
     const [loadingCities, setLoadingCities] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     useEffect(() => {
         if (showCityModal) {
@@ -30,7 +32,7 @@ const Navbar = () => {
                 try {
                     const config = { headers: { Authorization: `Bearer ${user.token}` } };
                     const res = await axios.get(`${API_BASE_URL}/studios/cities`, config);
-                    setCities(res.data.sort());
+                    setCities(['All Locations', ...res.data.sort()]);
                 } catch (error) {
                     console.error("Failed to fetch cities", error);
                 } finally {
@@ -41,12 +43,37 @@ const Navbar = () => {
         }
     }, [showCityModal, user]);
 
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (searchKeyword.length > 0) {
+                try {
+                    const config = { headers: { Authorization: `Bearer ${user.token}` } };
+                    const res = await axios.get(`${API_BASE_URL}/studios?keyword=${searchKeyword}`, config);
+                    setSuggestions(res.data.slice(0, 5)); // Limit to 5 suggestions
+                    setShowSuggestions(true);
+                } catch (error) {
+                    console.error("Failed to fetch suggestions", error);
+                }
+            } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            }
+        };
+
+        const timeoutId = setTimeout(() => {
+            if (user) fetchSuggestions();
+        }, 300); // Debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [searchKeyword, user]);
+
     const handleLogout = () => {
         logout();
         navigate('/login');
         setShowSidebar(false);
     };
 
+    // ... (cityImages logic remains same)
     // Load all city images from assets/cities
     const cityImagesGlob = import.meta.glob('../assets/cities/*.{png,jpg,jpeg,svg}', { eager: true });
 
@@ -65,14 +92,15 @@ const Navbar = () => {
     };
 
     const getCityVisual = (city) => {
+        if (city === 'All Locations') return <img src={pwLogo} alt="All Locations" width="48" height="48" className="w-12 h-12 object-contain mb-2 group-hover:scale-110 transition-transform opacity-80 group-hover:opacity-100" />;
         const imageSrc = cityImages[city.toLowerCase()];
         if (imageSrc) {
-            return <img src={imageSrc} alt={city} className="w-12 h-12 object-contain mb-2 group-hover:scale-110 transition-transform grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100" />;
+            return <img src={imageSrc} alt={city} width="48" height="48" className="w-12 h-12 object-contain mb-2 group-hover:scale-110 transition-transform grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100 dark:invert dark:mix-blend-screen" />;
         }
         if (cityIconMap[city]) {
             return cityIconMap[city];
         }
-        return <img src={pwLogo} alt={city} className="w-10 h-10 object-contain mb-2 opacity-50 group-hover:opacity-100 transition-opacity grayscale" />;
+        return <img src={pwLogo} alt={city} width="40" height="40" className="w-10 h-10 object-contain mb-2 opacity-50 group-hover:opacity-100 transition-opacity grayscale" />;
     };
 
     return (
@@ -105,7 +133,7 @@ const Navbar = () => {
 
                         {/* Center: Search Bar */}
                         {user && (
-                            <div className="flex-1 max-w-2xl mx-4">
+                            <div className="flex-1 max-w-2xl mx-4 relative">
                                 <div className="relative group">
                                     <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
                                     <input
@@ -114,8 +142,47 @@ const Navbar = () => {
                                         className="w-full pl-11 pr-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                                         value={searchKeyword}
                                         onChange={(e) => setSearchKeyword(e.target.value)}
+                                        onFocus={() => {
+                                            if (suggestions.length > 0) setShowSuggestions(true);
+                                        }}
+                                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                                     />
                                 </div>
+                                {/* Search Suggestions Dropdown */}
+                                <AnimatePresence>
+                                    {showSuggestions && suggestions.length > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50"
+                                        >
+                                            {suggestions.map((studio) => (
+                                                <div
+                                                    key={studio._id}
+                                                    onClick={() => {
+                                                        navigate(`/studios/${studio._id}`);
+                                                        setSearchKeyword('');
+                                                        setShowSuggestions(false);
+                                                    }}
+                                                    className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-50 dark:border-gray-700/50 last:border-0"
+                                                >
+                                                    <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                                                        {studio.coverPhoto ? (
+                                                            <img src={studio.coverPhoto.startsWith('http') || studio.coverPhoto.startsWith('/assets') ? studio.coverPhoto : `${API_BASE_URL}${studio.coverPhoto}`} alt={studio.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-400"><FaBuilding /></div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{studio.name}</h4>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{studio.city}, {studio.area}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         )}
 
@@ -173,7 +240,7 @@ const Navbar = () => {
                                         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl overflow-hidden">
                                             {user.profilePicture ? (
                                                 <img
-                                                    src={user.profilePicture.startsWith('http') ? user.profilePicture : `${import.meta.env.VITE_SERVER_URL}${user.profilePicture}`}
+                                                    src={user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/assets') ? user.profilePicture : `${API_BASE_URL}${user.profilePicture}`}
                                                     alt={user.name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -236,7 +303,7 @@ const Navbar = () => {
                 )}
             </AnimatePresence>
 
-            {/* City Selection Modal (Unchanged logic, just ensuring it's here) */}
+            {/* City Selection Modal */}
             <AnimatePresence>
                 {showCityModal && (
                     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
@@ -287,7 +354,7 @@ const Navbar = () => {
 
                             {/* Popular Cities */}
                             <div className="p-8 bg-gray-50 dark:bg-gray-900/50 overflow-y-auto custom-scrollbar flex-1">
-                                <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 text-center">Popular Cities</h3>
+                                <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 text-center">Our Current Cities</h3>
                                 {loadingCities ? (
                                     <div className="text-center py-12 text-gray-500">Loading cities...</div>
                                 ) : (
@@ -296,12 +363,12 @@ const Navbar = () => {
                                             <button
                                                 key={city}
                                                 onClick={() => {
-                                                    setSelectedCity(city);
+                                                    setSelectedCity(city === 'All Locations' ? '' : city);
                                                     setShowCityModal(false);
                                                 }}
                                                 className={`
                                                     group flex flex-col items-center justify-center p-6 rounded-2xl border transition-all aspect-square
-                                                    ${selectedCity === city
+                                                    ${(selectedCity === city || (city === 'All Locations' && selectedCity === ''))
                                                         ? 'border-primary bg-primary/5 text-primary shadow-md ring-2 ring-primary/20'
                                                         : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1'
                                                     }

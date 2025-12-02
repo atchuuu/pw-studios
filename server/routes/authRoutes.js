@@ -1,11 +1,8 @@
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
-const { authUser, registerUser, googleAuthCallback, getMe, updateProfile } = require('../controllers/authController');
+const { googleAuthCallback, getMe, updateProfile } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
-
-router.post('/register', registerUser);
-router.post('/login', authUser);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
 
