@@ -41,7 +41,7 @@ function App() {
         <AuthProvider>
             <ThemeProvider>
                 <LocationProvider>
-                    <Router>
+                    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
                             <Toaster position="top-center" reverseOrder={false} />
                             <Layout>

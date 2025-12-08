@@ -7,8 +7,9 @@ import { FaMapMarkerAlt, FaUsers, FaCheckCircle, FaCalendarAlt, FaClock, FaArrow
 import { API_BASE_URL } from '../utils/apiConfig';
 import toast from 'react-hot-toast';
 
-const StudioDetails = () => {
-    const { id } = useParams();
+const StudioDetails = ({ studioId, isModal = false }) => {
+    const { id: paramId } = useParams();
+    const id = studioId || paramId;
     const { user } = useAuth();
     const navigate = useNavigate();
     const [studio, setStudio] = useState(null);
@@ -116,10 +117,10 @@ const StudioDetails = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="min-h-screen bg-gray-50 dark:bg-dark-bg pb-20 transition-colors duration-300"
+            className={`bg-gray-50 dark:bg-dark-bg transition-colors duration-300 ${isModal ? 'h-full overflow-y-auto' : 'min-h-screen pb-20'}`}
         >
             {/* 1. Hero Section */}
-            <div className="relative h-[70vh] min-h-[500px] overflow-hidden">
+            <div className={`relative overflow-hidden ${isModal ? 'h-[40vh] min-h-[300px]' : 'h-[70vh] min-h-[500px]'}`}>
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentImageIndex}

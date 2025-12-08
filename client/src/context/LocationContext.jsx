@@ -84,7 +84,7 @@ export const LocationProvider = ({ children }) => {
         locationLoading,
         locationError,
         searchKeyword,
-        searchKeyword,
+
         setSearchKeyword,
         filters,
         setFilters

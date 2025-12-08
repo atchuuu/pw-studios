@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { useTheme } from '../context/ThemeContext';
 
 const containerStyle = {
     width: '100%',
@@ -11,8 +12,115 @@ const defaultCenter = {
     lng: 77.2090
 };
 
-const StudioMap = ({ studios, userLocation }) => {
+// Map Styles
+const darkModeStyles = [
+    {
+        "featureType": "all",
+        "elementType": "geometry",
+        "stylers": [{ "color": "#242f3e" }]
+    },
+    {
+        "featureType": "all",
+        "elementType": "labels.text.stroke",
+        "stylers": [{ "lightness": -80 }]
+    },
+    {
+        "featureType": "administrative",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#746855" }]
+    },
+    {
+        "featureType": "administrative.locality",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#d59563" }]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#d59563" }]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "geometry",
+        "stylers": [{ "color": "#263c3f" }]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#6b9a76" }]
+    },
+    {
+        "featureType": "road",
+        "elementType": "geometry",
+        "stylers": [{ "color": "#38414e" }]
+    },
+    {
+        "featureType": "road",
+        "elementType": "geometry.stroke",
+        "stylers": [{ "color": "#212a37" }]
+    },
+    {
+        "featureType": "road",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#9ca5b3" }]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry",
+        "stylers": [{ "color": "#746855" }]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry.stroke",
+        "stylers": [{ "color": "#1f2835" }]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#f3d19c" }]
+    },
+    {
+        "featureType": "transit",
+        "elementType": "geometry",
+        "stylers": [{ "color": "#2f3948" }]
+    },
+    {
+        "featureType": "transit.station",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#d59563" }]
+    },
+    {
+        "featureType": "water",
+        "elementType": "geometry",
+        "stylers": [{ "color": "#17263c" }]
+    },
+    {
+        "featureType": "water",
+        "elementType": "labels.text.fill",
+        "stylers": [{ "color": "#515c6d" }]
+    },
+    {
+        "featureType": "water",
+        "elementType": "labels.text.stroke",
+        "stylers": [{ "lightness": -20 }]
+    }
+];
+
+const lightModeStyles = []; // Default Google Maps styling
+
+const StudioMap = ({ studios, userLocation, selectedStudioId, onStudioClick }) => {
     const [selectedStudio, setSelectedStudio] = useState(null);
+    const { theme } = useTheme();
+
+    // Update internal state if selectedStudioId changes from parent
+    useEffect(() => {
+        if (selectedStudioId) {
+            const studio = studios.find(s => s._id === selectedStudioId);
+            if (studio) setSelectedStudio(studio);
+        } else {
+            setSelectedStudio(null);
+        }
+    }, [selectedStudioId, studios]);
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -20,133 +128,127 @@ const StudioMap = ({ studios, userLocation }) => {
     });
 
     const center = useMemo(() => {
+        if (selectedStudio) {
+            return { lat: parseFloat(selectedStudio.lat), lng: parseFloat(selectedStudio.lng) };
+        }
         return studios.length > 0
             ? { lat: parseFloat(studios[0].lat) || defaultCenter.lat, lng: parseFloat(studios[0].lng) || defaultCenter.lng }
             : defaultCenter;
-    }, [studios]);
+    }, [studios, selectedStudio]);
+
+    const mapRef = useRef(null);
+
+    const onLoad = React.useCallback(function callback(map) {
+        mapRef.current = map;
+    }, []);
+
+    const onUnmount = React.useCallback(function callback(map) {
+        mapRef.current = null;
+    }, []);
+
+    // Fit bounds to show all studios
+    useEffect(() => {
+        if (mapRef.current && studios.length > 0) {
+            const bounds = new window.google.maps.LatLngBounds();
+            studios.forEach(studio => {
+                if (!isNaN(parseFloat(studio.lat)) && !isNaN(parseFloat(studio.lng))) {
+                    bounds.extend({ lat: parseFloat(studio.lat), lng: parseFloat(studio.lng) });
+                }
+            });
+            if (userLocation) {
+                bounds.extend({ lat: userLocation.lat, lng: userLocation.lng });
+            }
+            mapRef.current.fitBounds(bounds);
+        }
+    }, [studios, userLocation, isLoaded]);
 
     if (!isLoaded) return <div>Loading Map...</div>;
 
+    const pinIcon = {
+        path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+        fillOpacity: 1,
+        strokeWeight: 2,
+        strokeColor: "#ffffff",
+        scale: 2,
+        anchor: { x: 12, y: 22 }
+    };
+
     return (
 
-        <div className="h-[500px] w-full rounded-2xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700/50 glass-card">
+        <div className="h-full w-full rounded-none overflow-hidden">
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={center}
                 zoom={10}
+                onLoad={onLoad}
+                onUnmount={onUnmount}
                 options={{
                     disableDefaultUI: false,
                     zoomControl: true,
-                    styles: [
-                        {
-                            "featureType": "all",
-                            "elementType": "geometry",
-                            "stylers": [{ "color": "#242f3e" }]
-                        },
-                        {
-                            "featureType": "all",
-                            "elementType": "labels.text.stroke",
-                            "stylers": [{ "lightness": -80 }]
-                        },
-                        {
-                            "featureType": "administrative",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#746855" }]
-                        },
-                        {
-                            "featureType": "administrative.locality",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#d59563" }]
-                        },
-                        {
-                            "featureType": "poi",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#d59563" }]
-                        },
-                        {
-                            "featureType": "poi.park",
-                            "elementType": "geometry",
-                            "stylers": [{ "color": "#263c3f" }]
-                        },
-                        {
-                            "featureType": "poi.park",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#6b9a76" }]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "geometry",
-                            "stylers": [{ "color": "#38414e" }]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "geometry.stroke",
-                            "stylers": [{ "color": "#212a37" }]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#9ca5b3" }]
-                        },
-                        {
-                            "featureType": "road.highway",
-                            "elementType": "geometry",
-                            "stylers": [{ "color": "#746855" }]
-                        },
-                        {
-                            "featureType": "road.highway",
-                            "elementType": "geometry.stroke",
-                            "stylers": [{ "color": "#1f2835" }]
-                        },
-                        {
-                            "featureType": "road.highway",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#f3d19c" }]
-                        },
-                        {
-                            "featureType": "transit",
-                            "elementType": "geometry",
-                            "stylers": [{ "color": "#2f3948" }]
-                        },
-                        {
-                            "featureType": "transit.station",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#d59563" }]
-                        },
-                        {
-                            "featureType": "water",
-                            "elementType": "geometry",
-                            "stylers": [{ "color": "#17263c" }]
-                        },
-                        {
-                            "featureType": "water",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{ "color": "#515c6d" }]
-                        },
-                        {
-                            "featureType": "water",
-                            "elementType": "labels.text.stroke",
-                            "stylers": [{ "lightness": -20 }]
-                        }
-                    ]
+                    styles: theme === 'dark' ? darkModeStyles : lightModeStyles
                 }}
             >
                 {studios.map((studio) => {
-                    const lat = parseFloat(studio.lat);
-                    const lng = parseFloat(studio.lng);
-                    if (isNaN(lat) || isNaN(lng)) return null;
+                    let coords = null;
+                    if (!isNaN(parseFloat(studio.lat)) && !isNaN(parseFloat(studio.lng))) {
+                        coords = { lat: parseFloat(studio.lat), lng: parseFloat(studio.lng) };
+                    } else if (studio.coordinates && Array.isArray(studio.coordinates) && studio.coordinates.length === 2) {
+                        coords = { lat: parseFloat(studio.coordinates[1]), lng: parseFloat(studio.coordinates[0]) };
+                    } else if (studio.coordinates && studio.coordinates.coordinates && Array.isArray(studio.coordinates.coordinates)) {
+                        coords = { lat: parseFloat(studio.coordinates.coordinates[1]), lng: parseFloat(studio.coordinates.coordinates[0]) };
+                    } else if (studio.location && studio.location.coordinates && Array.isArray(studio.location.coordinates)) {
+                        coords = { lat: parseFloat(studio.location.coordinates[1]), lng: parseFloat(studio.location.coordinates[0]) };
+                    }
+
+                    if (!coords) return null;
 
                     return (
-                        <Marker
+                        <MarkerF
                             key={studio._id}
-                            position={{ lat, lng }}
-                            onClick={() => setSelectedStudio(studio)}
+                            position={coords}
+                            onClick={() => onStudioClick(studio)}
+                            icon={{
+                                path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+                                fillColor: selectedStudioId === studio._id ? "#5a189a" : "#EF4444",
+                                fillOpacity: 1,
+                                strokeColor: "#ffffff",
+                                strokeWeight: 2,
+                                scale: 1.5,
+                                anchor: new window.google.maps.Point(12, 22),
+                            }}
                         />
                     );
                 })}
 
+                {/* Debug Marker at Map Center */}
+                {/* <MarkerF
+                    position={center}
+                    label="D"
+                    title="Debug Center"
+                /> */}
+
+                {selectedStudio && (
+                    <InfoWindowF
+                        position={{ lat: parseFloat(selectedStudio.lat), lng: parseFloat(selectedStudio.lng) }}
+                        onCloseClick={() => onStudioClick(null)}
+                    >
+                        <div className="p-2 min-w-[200px] max-w-[250px]">
+                            <h3 className="font-bold text-gray-900 text-base mb-1">{selectedStudio.name}</h3>
+                            <p className="text-xs text-gray-600 mb-2 line-clamp-6">{selectedStudio.address}</p>
+                            <a
+                                href={selectedStudio.googleMapLink || `https://www.google.com/maps/dir/?api=1&destination=${selectedStudio.lat},${selectedStudio.lng}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block bg-brand-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-brand-700 transition-colors"
+                            >
+                                Get Directions
+                            </a>
+                        </div>
+                    </InfoWindowF>
+                )}
+
                 {userLocation && (
-                    <Marker
+                    <MarkerF
                         position={{ lat: userLocation.lat, lng: userLocation.lng }}
                         icon={{
                             path: window.google.maps.SymbolPath.CIRCLE,
@@ -158,31 +260,6 @@ const StudioMap = ({ studios, userLocation }) => {
                         }}
                         title="You are here"
                     />
-                )}
-
-                {selectedStudio && (
-                    <InfoWindow
-                        position={{ lat: parseFloat(selectedStudio.lat), lng: parseFloat(selectedStudio.lng) }}
-                        onCloseClick={() => setSelectedStudio(null)}
-                    >
-                        <div className="text-center p-3 min-w-[200px]">
-                            <h3 className="font-bold text-gray-900 text-lg mb-1">{selectedStudio.name}</h3>
-                            <p className="text-sm text-gray-600 mb-3">{selectedStudio.address}</p>
-                            <div className="flex flex-col gap-2">
-                                <a href={`/studios/${selectedStudio._id}`} className="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-700 transition-colors">
-                                    View Details
-                                </a>
-                                <a
-                                    href={selectedStudio.googleMapLink || `https://www.google.com/maps/dir/?api=1&destination=${selectedStudio.lat},${selectedStudio.lng}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-brand-600 text-sm font-bold hover:underline"
-                                >
-                                    Get Directions
-                                </a>
-                            </div>
-                        </div>
-                    </InfoWindow>
                 )}
             </GoogleMap>
         </div>

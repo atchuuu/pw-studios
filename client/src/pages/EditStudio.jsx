@@ -300,9 +300,9 @@ const EditStudio = () => {
 
                             {/* Cover Photo */}
                             <div className="md:col-span-2">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Cover Photo (URL)</label>
-                                    <label className="cursor-pointer text-brand-600 hover:text-brand-500 flex items-center gap-2 text-sm font-bold bg-brand-50 dark:bg-brand-900/20 px-3 py-1.5 rounded-lg transition-colors">
+                                <div className="flex justify-between items-center mb-4">
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Cover Photo</label>
+                                    <label className="cursor-pointer text-brand-600 hover:text-brand-500 flex items-center gap-2 text-sm font-bold bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl transition-all hover:scale-105 shadow-sm">
                                         {uploading ? <FaSpinner className="animate-spin" /> : <FaCloudUploadAlt />}
                                         Upload Cover
                                         <input
@@ -314,26 +314,23 @@ const EditStudio = () => {
                                         />
                                     </label>
                                 </div>
-                                <input
-                                    type="text"
-                                    name="coverPhoto"
-                                    value={formData.coverPhoto || ''}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all"
-                                    placeholder="/assets/profile-banner.png"
-                                />
-                                {formData.coverPhoto && (
-                                    <div className="mt-4 relative w-full h-56 rounded-xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
-                                        <img src={getImageUrl(formData.coverPhoto)} alt="Cover Preview" className="w-full h-full object-cover" />
+                                {formData.coverPhoto ? (
+                                    <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 group">
+                                        <img src={getImageUrl(formData.coverPhoto)} alt="Cover Preview" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300" />
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-64 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                        No cover photo uploaded
                                     </div>
                                 )}
                             </div>
 
                             {/* Exterior Photos */}
                             <div className="md:col-span-2">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Exterior Photos (URLs)</label>
-                                    <label className="cursor-pointer text-brand-600 hover:text-brand-500 flex items-center gap-2 text-sm font-bold bg-brand-50 dark:bg-brand-900/20 px-3 py-1.5 rounded-lg transition-colors">
+                                <div className="flex justify-between items-center mb-4">
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Exterior Photos</label>
+                                    <label className="cursor-pointer text-brand-600 hover:text-brand-500 flex items-center gap-2 text-sm font-bold bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl transition-all hover:scale-105 shadow-sm">
                                         {uploading ? <FaSpinner className="animate-spin" /> : <FaCloudUploadAlt />}
                                         Upload Photos
                                         <input
@@ -346,21 +343,26 @@ const EditStudio = () => {
                                         />
                                     </label>
                                 </div>
-                                <textarea
-                                    name="exteriorPhotos"
-                                    value={formData.exteriorPhotos || ''}
-                                    onChange={handleChange}
-                                    rows="2"
-                                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all"
-                                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                                />
+                                {formData.exteriorPhotos ? (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                        {formData.exteriorPhotos.split(',').map((url, index) => (
+                                            <div key={index} className="relative aspect-square rounded-xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700 group">
+                                                <img src={getImageUrl(url.trim())} alt={`Exterior ${index + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-32 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                        No exterior photos uploaded
+                                    </div>
+                                )}
                             </div>
 
                             {/* Interior Photos */}
                             <div className="md:col-span-2">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Interior Photos (URLs)</label>
-                                    <label className="cursor-pointer text-brand-600 hover:text-brand-500 flex items-center gap-2 text-sm font-bold bg-brand-50 dark:bg-brand-900/20 px-3 py-1.5 rounded-lg transition-colors">
+                                <div className="flex justify-between items-center mb-4">
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Interior Photos</label>
+                                    <label className="cursor-pointer text-brand-600 hover:text-brand-500 flex items-center gap-2 text-sm font-bold bg-brand-50 dark:bg-brand-900/20 px-4 py-2 rounded-xl transition-all hover:scale-105 shadow-sm">
                                         {uploading ? <FaSpinner className="animate-spin" /> : <FaCloudUploadAlt />}
                                         Upload Photos
                                         <input
@@ -373,14 +375,19 @@ const EditStudio = () => {
                                         />
                                     </label>
                                 </div>
-                                <textarea
-                                    name="interiorPhotos"
-                                    value={formData.interiorPhotos || ''}
-                                    onChange={handleChange}
-                                    rows="2"
-                                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all"
-                                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                                />
+                                {formData.interiorPhotos ? (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                        {formData.interiorPhotos.split(',').map((url, index) => (
+                                            <div key={index} className="relative aspect-square rounded-xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700 group">
+                                                <img src={getImageUrl(url.trim())} alt={`Interior ${index + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-32 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                        No interior photos uploaded
+                                    </div>
+                                )}
                             </div>
                         </div>
 

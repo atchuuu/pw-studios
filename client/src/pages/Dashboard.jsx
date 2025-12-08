@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useLocationContext } from '../context/LocationContext';
@@ -7,11 +7,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaSearch, FaMapMarkerAlt } from 'react-icons/fa';
 import { API_BASE_URL } from '../utils/apiConfig';
 import defaultCover from '../assets/profile-banner.png';
+import StudioMap from '../components/StudioMap';
+import StudioDetails from './StudioDetails';
 
 const Dashboard = () => {
     const { user } = useAuth();
     const { selectedCity, setSelectedCity, userLocation, isNearMe, searchKeyword, setSearchKeyword, filters } = useLocationContext();
     const [studios, setStudios] = useState([]);
+    const [showMap, setShowMap] = useState(false);
+    const [showList, setShowList] = useState(true);
+    const [selectedStudioId, setSelectedStudioId] = useState(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const listRef = useRef(null);
+    const cardRefs = useRef({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -46,6 +54,17 @@ const Dashboard = () => {
         };
         if (user) fetchData();
     }, [user, searchKeyword, selectedCity, userLocation, isNearMe, filters]);
+
+    // Scroll to selected card when selectedStudioId changes
+    useEffect(() => {
+        if (selectedStudioId && cardRefs.current[selectedStudioId] && listRef.current) {
+            cardRefs.current[selectedStudioId].scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }, [selectedStudioId]);
 
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         if (!lat1 || !lon1 || !lat2 || !lon2) return null;
@@ -94,6 +113,200 @@ const Dashboard = () => {
                     </motion.p>
                 </div>
             </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer" onClick={() => setShowMap(true)}>
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-900">
+                        <img src="/pw-banner.png" alt="PW Banner" className="w-full h-full object-cover opacity-60" />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand-900/90 to-brand-800/60 backdrop-blur-[2px]"></div>
+                    <div className="relative p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="text-center sm:text-left">
+                            <h2 className="text-3xl sm:text-4xl font-display font-bold text-white mb-2">Find Your Nearest PW Studio</h2>
+                            <p className="text-brand-100 text-lg max-w-xl">Explore all our premium recording spaces across the country. Locate the one closest to you.</p>
+                        </div>
+                        <button className="px-8 py-4 bg-white text-brand-600 rounded-xl font-bold text-lg shadow-lg hover:bg-brand-50 transition-colors flex items-center gap-3 group-hover:translate-x-1 duration-300">
+                            <FaMapMarkerAlt /> Open Map View
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Map Modal */}
+            <AnimatePresence>
+                {showMap && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                    >
+                        <div className="relative w-full max-w-5xl h-[85vh] bg-white dark:bg-dark-card rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setShowMap(false)}
+                                className="absolute top-4 left-4 z-20 bg-white/90 dark:bg-black/50 p-2 rounded-full text-gray-900 dark:text-white hover:bg-white dark:hover:bg-black transition-colors shadow-lg backdrop-blur-md"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+
+                            {/* Map Area */}
+                            <div className="w-full h-full">
+                                <StudioMap
+                                    studios={studios}
+                                    userLocation={userLocation}
+                                    selectedStudioId={selectedStudioId}
+                                    onStudioClick={(studio) => setSelectedStudioId(studio ? studio._id : null)}
+                                />
+                            </div>
+
+                            {/* Toggle List Button */}
+                            <button
+                                onClick={() => setShowList(!showList)}
+                                className="absolute bottom-4 right-4 z-40 bg-white dark:bg-dark-card text-gray-900 dark:text-white px-4 py-2 rounded-lg shadow-lg font-semibold text-sm transition-transform hover:scale-105"
+                            >
+                                {showList ? 'Hide List' : 'Show List'}
+                            </button>
+
+                            {/* Horizontal Studio List */}
+                            <AnimatePresence>
+                                {showList && (
+                                    <motion.div
+                                        initial={{ y: 50, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        exit={{ y: 50, opacity: 0 }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        className="absolute bottom-0 left-0 right-0 z-30 p-4 pointer-events-none"
+                                    >
+                                        <div
+                                            ref={listRef}
+                                            className="flex gap-4 overflow-x-auto pb-4 px-2 snap-x snap-mandatory custom-scrollbar pointer-events-auto items-end scroll-smooth"
+                                            onScroll={(e) => {
+                                                const container = e.target;
+                                                // Simple debounce implementation
+                                                if (window.scrollTimeout) clearTimeout(window.scrollTimeout);
+
+                                                window.scrollTimeout = setTimeout(() => {
+                                                    const center = container.scrollLeft + container.clientWidth / 2;
+                                                    let closestStudio = null;
+                                                    let minDistance = Infinity;
+
+                                                    studios.forEach(studio => {
+                                                        const card = cardRefs.current[studio._id];
+                                                        if (card) {
+                                                            const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                                                            const distance = Math.abs(center - cardCenter);
+                                                            if (distance < minDistance) {
+                                                                minDistance = distance;
+                                                                closestStudio = studio;
+                                                            }
+                                                        }
+                                                    });
+
+                                                    if (closestStudio && closestStudio._id !== selectedStudioId) {
+                                                        if (!window.isProgrammaticScroll) {
+                                                            setSelectedStudioId(closestStudio._id);
+                                                        }
+                                                    }
+                                                }, 100); // 100ms debounce
+                                            }}
+                                        >
+                                            {studios.map((studio, index) => (
+                                                <motion.div
+                                                    key={studio._id}
+                                                    layoutId={`studio-card-${studio._id}`}
+                                                    initial={{ opacity: 0, x: 20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                                                    ref={el => cardRefs.current[studio._id] = el}
+                                                    onClick={() => setSelectedStudioId(studio._id)}
+                                                    className={`
+                                                flex-shrink-0 w-80 md:w-96 bg-white dark:bg-dark-card rounded-2xl shadow-xl overflow-hidden snap-center transition-all duration-300 cursor-pointer border group
+                                                ${selectedStudioId === studio._id
+                                                            ? 'border-brand-500 ring-4 ring-brand-500/20 shadow-brand-500/20 scale-[1.02]'
+                                                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:scale-[1.01]'
+                                                        }
+                                            `}
+                                                >
+                                                    <div className="flex h-36 md:h-40">
+                                                        <div className="w-36 md:w-40 h-full relative flex-shrink-0">
+                                                            <img
+                                                                src={studio.coverPhoto ? (studio.coverPhoto.startsWith('http') || studio.coverPhoto.startsWith('/assets') ? studio.coverPhoto : `${API_BASE_URL}${studio.coverPhoto}`) : defaultCover}
+                                                                alt={studio.name}
+                                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                            />
+                                                        </div>
+                                                        <div className="p-4 flex flex-col justify-between flex-grow min-w-0">
+                                                            <div>
+                                                                <h3 className="text-gray-900 dark:text-white font-bold text-base line-clamp-1 mb-1 group-hover:text-brand-600 transition-colors">{studio.name}</h3>
+                                                                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex items-start gap-1" title={studio.address}>
+                                                                    <FaMapMarkerAlt className="text-brand-500 flex-shrink-0 text-xs mt-0.5" />
+                                                                    <span className="truncate">{studio.address}</span>
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="flex gap-2 mt-2">
+                                                                <a
+                                                                    href={studio.googleMapLink || `https://www.google.com/maps/dir/?api=1&destination=${studio.lat},${studio.lng}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    className="flex-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg font-semibold text-xs text-center transition-colors flex items-center justify-center gap-1"
+                                                                >
+                                                                    <FaMapMarkerAlt /> Map
+                                                                </a>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedStudioId(studio._id);
+                                                                        setShowDetailsModal(true);
+                                                                    }}
+                                                                    className="flex-[1.5] bg-brand-600 hover:bg-brand-700 text-white py-2 rounded-lg font-semibold text-xs shadow-sm transition-colors"
+                                                                >
+                                                                    Book
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Studio Details Modal */}
+            <AnimatePresence>
+                {showDetailsModal && selectedStudioId && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setShowDetailsModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-white dark:bg-dark-card w-full max-w-6xl h-[90vh] rounded-3xl overflow-hidden shadow-2xl relative"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <button
+                                onClick={() => setShowDetailsModal(false)}
+                                className="absolute top-6 right-6 z-50 bg-white/20 hover:bg-white/40 p-2 rounded-full text-white transition-colors backdrop-blur-md"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                            <StudioDetails studioId={selectedStudioId} isModal={true} />
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Results Header */}
@@ -209,7 +422,7 @@ const Dashboard = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 
