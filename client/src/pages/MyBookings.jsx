@@ -33,7 +33,7 @@ const MyBookings = () => {
             ));
         } catch (error) {
             console.error('Error cancelling booking:', error);
-            alert(error.response?.data?.message || 'Failed to cancel booking');
+            toast.error(error.response?.data?.message || 'Failed to cancel booking');
         }
     };
 
@@ -71,10 +71,10 @@ const MyBookings = () => {
 
                                 <div className="flex items-center gap-4 self-end sm:self-center">
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${booking.status === 'confirmed'
-                                            ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30'
-                                            : booking.status === 'cancelled'
-                                                ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30'
-                                                : 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/30'
+                                        ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30'
+                                        : booking.status === 'cancelled'
+                                            ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30'
+                                            : 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/30'
                                         }`}>
                                         {booking.status}
                                     </span>

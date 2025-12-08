@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaMapMarkerAlt, FaUsers, FaCheckCircle, FaCalendarAlt, FaClock, FaArrowDown, FaImages, FaTimes, FaBuilding, FaDoorOpen } from 'react-icons/fa';
 import { API_BASE_URL } from '../utils/apiConfig';
 import toast from 'react-hot-toast';
+import BookingModal from '../components/BookingModal';
 
 const StudioDetails = ({ studioId, isModal = false }) => {
     const { id: paramId } = useParams();
@@ -13,16 +14,9 @@ const StudioDetails = ({ studioId, isModal = false }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [studio, setStudio] = useState(null);
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [bookedSlots, setBookedSlots] = useState([]);
-    const [selectedSlot, setSelectedSlot] = useState(null);
-    const [selectedUnit, setSelectedUnit] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [showUnitModal, setShowUnitModal] = useState(false);
     const [activeTab, setActiveTab] = useState('interior'); // For album view
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-    const bookingSectionRef = useRef(null);
+    const [showBookingModal, setShowBookingModal] = useState(false);
 
     // Combine images for slideshow: Interior first, then Exterior
     const interiorImages = studio?.interiorPhotos || [];
@@ -48,66 +42,17 @@ const StudioDetails = ({ studioId, isModal = false }) => {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             const { data } = await axios.get(`${API_BASE_URL}/studios/${id}`, config);
             setStudio(data);
-            // Default to first unit if available
-            if (data.studioNumbers && data.studioNumbers.length > 0) {
-                setSelectedUnit(data.studioNumbers[0]);
-            }
         };
         fetchStudio();
+        // Scroll to top when studio ID changes
+        window.scrollTo(0, 0);
     }, [id, user]);
-
-    useEffect(() => {
-        const fetchBookings = async () => {
-            if (!date || !selectedUnit) return;
-            try {
-                const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                const { data } = await axios.get(`${API_BASE_URL}/bookings/studio/${id}?date=${date}&studioUnit=${selectedUnit}`, config);
-                setBookedSlots(data.map(b => new Date(b.startTime).getHours()));
-            } catch (error) {
-                console.error("Failed to fetch bookings", error);
-            }
-        };
-        fetchBookings();
-    }, [id, date, selectedUnit, user]);
-
-    const handleBook = async () => {
-        if (!selectedSlot || !selectedUnit) return;
-        setLoading(true);
-        try {
-            const startTime = new Date(date);
-            startTime.setHours(selectedSlot, 0, 0, 0);
-
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.post(`${API_BASE_URL}/bookings`, {
-                studioId: id,
-                studioUnit: selectedUnit,
-                startTime: startTime.toISOString()
-            }, config);
-
-            toast.success('Booking Confirmed!');
-            navigate('/bookings');
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Booking failed');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const scrollToBooking = () => {
-        bookingSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
 
     const getImageUrl = (url) => {
         if (!url) return "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=1000";
         if (url.startsWith('http')) return url;
         return `${import.meta.env.VITE_SERVER_URL}${url}`;
     };
-
-    // Generate slots from 6 AM to 8 PM (Last slot starts at 20:00)
-    const slots = [];
-    for (let i = 6; i <= 20; i++) {
-        slots.push(i);
-    }
 
     if (!studio) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
 
@@ -169,10 +114,10 @@ const StudioDetails = ({ studioId, isModal = false }) => {
 
                         <div className="flex flex-wrap gap-4">
                             <button
-                                onClick={scrollToBooking}
+                                onClick={() => setShowBookingModal(true)}
                                 className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-600/30 hover:shadow-brand-600/50 flex items-center gap-2 hover:-translate-y-1"
                             >
-                                Continue to Booking <FaArrowDown />
+                                Book Now
                             </button>
                             {user && (user.role === 'studio_admin' || user.role === 'super_admin') && (
                                 <button
@@ -266,7 +211,7 @@ const StudioDetails = ({ studioId, isModal = false }) => {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="glass-card rounded-3xl p-8 sm:p-10"
+                        className="glass-card rounded-3xl p-8 sm:p-10 mb-12"
                     >
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                             <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -337,175 +282,15 @@ const StudioDetails = ({ studioId, isModal = false }) => {
                         </div>
                     </motion.div>
                 )}
-
-                {/* 4. Booking Section */}
-                <div ref={bookingSectionRef} className="scroll-mt-28">
-                    <motion.div
-                        initial={{ y: 40, opacity: 0 }}
-                        whileInView={{ y: 0, opacity: 1 }}
-                        viewport={{ once: true }}
-                        className="relative overflow-hidden rounded-3xl shadow-2xl bg-dark-card border border-dark-border"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/40 to-dark-bg z-0"></div>
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-
-                        <div className="relative z-10 p-8 sm:p-12 lg:p-16">
-                            <div className="text-center mb-12">
-                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-4">Ready to Record?</h2>
-                                <p className="text-gray-300 text-lg max-w-2xl mx-auto">Select your preferred studio unit, date, and time slot to instantly reserve your session.</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                                {/* Unit & Date Selection */}
-                                <div className="lg:col-span-1 space-y-8">
-                                    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                                        <label className="block text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                            <FaBuilding className="text-brand-400" /> Studio Unit
-                                        </label>
-                                        <button
-                                            onClick={() => setShowUnitModal(true)}
-                                            className="w-full bg-white/10 hover:bg-white/20 border border-white/10 text-white py-4 px-6 rounded-xl flex justify-between items-center transition-all group"
-                                        >
-                                            <span className="font-bold text-xl">{selectedUnit || 'Select a Unit'}</span>
-                                            <span className="bg-brand-500/20 text-brand-300 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider group-hover:bg-brand-500 group-hover:text-white transition-colors">Change</span>
-                                        </button>
-                                    </div>
-
-                                    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                                        <label className="block text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                            <FaCalendarAlt className="text-brand-400" /> Select Date
-                                        </label>
-                                        <input
-                                            type="date"
-                                            required
-                                            className="w-full border border-white/10 rounded-xl px-6 py-4 bg-white/10 text-white text-lg focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all placeholder-gray-400"
-                                            value={date}
-                                            min={new Date().toISOString().split('T')[0]}
-                                            onChange={(e) => {
-                                                setDate(e.target.value);
-                                                setSelectedSlot(null);
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Slot Selection */}
-                                <div className="lg:col-span-2 space-y-6">
-                                    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 h-full">
-                                        <label className="block text-lg font-bold text-white mb-6 flex items-center gap-2">
-                                            <FaClock className="text-brand-400" /> Available Slots {selectedUnit && <span className="text-gray-400 font-normal ml-1">for {selectedUnit}</span>}
-                                        </label>
-
-                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                                            {slots.map((hour) => {
-                                                const isBooked = bookedSlots.includes(hour);
-                                                const isSelected = selectedSlot === hour;
-                                                const timeLabel = `${hour.toString().padStart(2, '0')}:00`;
-
-                                                return (
-                                                    <button
-                                                        key={hour}
-                                                        disabled={isBooked || !selectedUnit}
-                                                        onClick={() => setSelectedSlot(hour)}
-                                                        className={`
-                                                            py-3 px-2 rounded-xl text-sm font-bold transition-all duration-200 relative overflow-hidden
-                                                            ${!selectedUnit
-                                                                ? 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/5'
-                                                                : isBooked
-                                                                    ? 'bg-red-900/20 text-red-400 cursor-not-allowed border border-red-900/30'
-                                                                    : isSelected
-                                                                        ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/40 transform scale-105 border border-brand-500'
-                                                                        : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white border border-white/10'
-                                                            }
-                                                        `}
-                                                    >
-                                                        {timeLabel}
-                                                        {isBooked && <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]"><FaTimes className="text-red-500" /></div>}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                        {!selectedUnit && (
-                                            <div className="mt-8 p-4 bg-yellow-900/20 border border-yellow-700/30 rounded-xl text-yellow-200 text-center text-sm font-medium">
-                                                Please select a studio unit from the left panel to view availability.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-12 flex justify-center">
-                                <button
-                                    onClick={handleBook}
-                                    disabled={loading || !selectedSlot || !selectedUnit}
-                                    className="w-full sm:w-auto min-w-[320px] bg-gradient-to-r from-brand-600 to-accent text-white py-4 px-12 rounded-2xl font-bold text-xl hover:from-brand-500 hover:to-brand-400 transition-all shadow-xl shadow-brand-900/50 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1 hover:scale-[1.02]"
-                                >
-                                    {loading ? 'Processing...' : 'Confirm Booking'}
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-
             </div>
 
-            {/* Unit Selection Modal */}
-            <AnimatePresence>
-                {showUnitModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/70 backdrop-blur-md"
-                            onClick={() => setShowUnitModal(false)}
-                        />
-                        <motion.div
-                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            className="relative glass-card rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/20"
-                        >
-                            <div className="p-6 border-b border-gray-100 dark:border-gray-700/50 flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <FaDoorOpen className="text-brand-500" /> Select Studio Unit
-                                </h3>
-                                <button
-                                    onClick={() => setShowUnitModal(false)}
-                                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
-                                >
-                                    <FaTimes />
-                                </button>
-                            </div>
-                            <div className="p-6 max-h-[60vh] overflow-y-auto bg-white/30 dark:bg-gray-900/30">
-                                <div className="grid grid-cols-2 gap-4">
-                                    {studio.studioNumbers && studio.studioNumbers.map((unit) => (
-                                        <button
-                                            key={unit}
-                                            onClick={() => {
-                                                setSelectedUnit(unit);
-                                                setSelectedSlot(null);
-                                                setShowUnitModal(false);
-                                            }}
-                                            className={`
-                                                p-5 rounded-2xl border-2 transition-all text-center group relative overflow-hidden
-                                                ${selectedUnit === unit
-                                                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 shadow-lg'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800'
-                                                }
-                                            `}
-                                        >
-                                            <span className="block text-xs font-bold uppercase tracking-wider opacity-60 mb-1">Unit</span>
-                                            <span className="text-2xl font-display font-bold">{unit}</span>
-                                            {selectedUnit === unit && <div className="absolute inset-0 bg-brand-500/5 dark:bg-brand-400/5" />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+            {/* Booking Modal */}
+            <BookingModal
+                studio={studio}
+                isOpen={showBookingModal}
+                onClose={() => setShowBookingModal(false)}
+            />
+
         </motion.div>
     );
 

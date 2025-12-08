@@ -5,7 +5,7 @@ const { Booking } = require('../models');
 // @route   POST /api/bookings
 // @access  Private
 const createBooking = asyncHandler(async (req, res) => {
-    const { studioId, studioUnit, startTime } = req.body;
+    const { studioId, studioUnit, startTime, endTime } = req.body;
 
     if (!studioUnit) {
         res.status(400);
@@ -13,31 +13,46 @@ const createBooking = asyncHandler(async (req, res) => {
     }
 
     const start = new Date(startTime);
-    const end = new Date(start.getTime() + 50 * 60000); // 50 minutes later
+    let end;
 
-    // Validate Slot Time (Must be on the hour, between 06:00 and 21:00)
-    const hour = start.getHours();
-    const minutes = start.getMinutes();
-
-    if (minutes !== 0 || hour < 6 || hour > 20) {
-        res.status(400);
-        throw new Error('Invalid slot time. Slots are hourly from 06:00 to 20:00.');
+    if (endTime) {
+        end = new Date(endTime);
+    } else {
+        // Default to 50 minutes if no end time provided (backward compatibility)
+        end = new Date(start.getTime() + 50 * 60000);
     }
 
-    // Check for conflicts
+    // Validate Slot Time (Must be between 06:00 and 21:00)
+    // Note: With dynamic booking, we accept any minute.
+    const hour = start.getHours();
+
+    // Simple check: Studio opens at 6 AM, closes at 9 PM (21:00)
+    if (hour < 6 || hour >= 21) {
+        res.status(400);
+        throw new Error('Invalid time. Studios are open from 06:00 to 21:00.');
+    }
+
+    // 10 Minute Buffer Check
+    const bufferMs = 10 * 60000;
+    const bufferStart = new Date(start.getTime() - bufferMs);
+    const bufferEnd = new Date(end.getTime() + bufferMs);
+
+    // Check for conflicts including buffer
+    // Conflict if: NewReq.Start < Existing.End AND NewReq.End > Existing.Start
+    // We check: BufferStart < Existing.End AND BufferEnd > Existing.Start
     const conflict = await Booking.findOne({
         studio: studioId,
         studioUnit: studioUnit,
         status: 'confirmed',
         $and: [
-            { startTime: { $lt: end } },
-            { endTime: { $gt: start } }
+            { startTime: { $lt: bufferEnd } },
+            { endTime: { $gt: bufferStart } }
         ]
     });
 
     if (conflict) {
         res.status(400);
-        throw new Error('This Studio Unit is already booked for this time slot');
+        throw new Error('Time slot unavailable. A 10-minute buffer is required between bookings.');
     }
 
     const booking = new Booking({
