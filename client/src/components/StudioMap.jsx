@@ -1,6 +1,45 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, InfoWindowF, useGoogleMap } from '@react-google-maps/api';
 import { useTheme } from '../context/ThemeContext';
+
+// Custom Advanced Marker Component
+const AdvancedMarker = ({ position, onClick, pinStyles }) => {
+    const map = useGoogleMap();
+    const markerRef = useRef(null);
+
+    useEffect(() => {
+        if (!map) return;
+
+        // Create PinElement
+        const pinElement = new google.maps.marker.PinElement({
+            background: pinStyles?.background,
+            borderColor: pinStyles?.borderColor,
+            glyphColor: pinStyles?.glyphColor,
+            scale: pinStyles?.scale || 1
+        });
+
+        // Create AdvancedMarkerElement
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position,
+            content: pinElement.element,
+            title: pinStyles?.title
+        });
+
+        // Add Click Listener
+        if (onClick) {
+            marker.addListener('click', onClick);
+        }
+
+        markerRef.current = marker;
+
+        return () => {
+            marker.map = null;
+        };
+    }, [map, position, onClick, pinStyles]);
+
+    return null;
+};
 
 const containerStyle = {
     width: '100%',
@@ -124,7 +163,8 @@ const StudioMap = ({ studios, userLocation, selectedStudioId, onStudioClick }) =
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: ['marker'] // Required for AdvancedMarkerElement
     });
 
     const center = useMemo(() => {
@@ -185,7 +225,8 @@ const StudioMap = ({ studios, userLocation, selectedStudioId, onStudioClick }) =
                 options={{
                     disableDefaultUI: false,
                     zoomControl: true,
-                    styles: theme === 'dark' ? darkModeStyles : lightModeStyles
+                    styles: theme === 'dark' ? darkModeStyles : lightModeStyles,
+                    mapId: 'DEMO_MAP_ID' // Required for Advanced Markers
                 }}
             >
                 {studios.map((studio) => {
@@ -202,35 +243,29 @@ const StudioMap = ({ studios, userLocation, selectedStudioId, onStudioClick }) =
 
                     if (!coords) return null;
 
+                    const isSelected = selectedStudioId === studio._id;
+
                     return (
-                        <MarkerF
+                        <AdvancedMarker
                             key={studio._id}
                             position={coords}
                             onClick={() => onStudioClick(studio)}
-                            icon={{
-                                path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
-                                fillColor: selectedStudioId === studio._id ? "#5a189a" : "#EF4444",
-                                fillOpacity: 1,
-                                strokeColor: "#ffffff",
-                                strokeWeight: 2,
-                                scale: 1.5,
-                                anchor: new window.google.maps.Point(12, 22),
+                            pinStyles={{
+                                background: isSelected ? "#5a189a" : "#EF4444", // Purple if selected, Red default
+                                borderColor: "#ffffff",
+                                glyphColor: "#ffffff",
+                                scale: 1.2, // Slightly larger
+                                title: studio.name
                             }}
                         />
                     );
                 })}
 
-                {/* Debug Marker at Map Center */}
-                {/* <MarkerF
-                    position={center}
-                    label="D"
-                    title="Debug Center"
-                /> */}
-
                 {selectedStudio && (
                     <InfoWindowF
                         position={{ lat: parseFloat(selectedStudio.lat), lng: parseFloat(selectedStudio.lng) }}
                         onCloseClick={() => onStudioClick(null)}
+                        options={{ pixelOffset: new window.google.maps.Size(0, -40) }} // Adjust for pin height
                     >
                         <div className="p-2 min-w-[200px] max-w-[250px]">
                             <h3 className="font-bold text-gray-900 text-base mb-1">{selectedStudio.name}</h3>
@@ -242,27 +277,27 @@ const StudioMap = ({ studios, userLocation, selectedStudioId, onStudioClick }) =
                                 className="inline-block bg-brand-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-brand-700 transition-colors"
                             >
                                 Get Directions
-                            </a>
-                        </div>
-                    </InfoWindowF>
+                            </a >
+                        </div >
+                    </InfoWindowF >
                 )}
 
-                {userLocation && (
-                    <MarkerF
-                        position={{ lat: userLocation.lat, lng: userLocation.lng }}
-                        icon={{
-                            path: window.google.maps.SymbolPath.CIRCLE,
-                            scale: 8,
-                            fillColor: "#4285F4",
-                            fillOpacity: 1,
-                            strokeColor: "white",
-                            strokeWeight: 2,
-                        }}
-                        title="You are here"
-                    />
-                )}
-            </GoogleMap>
-        </div>
+                {
+                    userLocation && (
+                        <AdvancedMarker
+                            position={{ lat: userLocation.lat, lng: userLocation.lng }}
+                            pinStyles={{
+                                background: "#4285F4", // Blue for user
+                                borderColor: "#ffffff",
+                                glyphColor: "#ffffff",
+                                scale: 1,
+                                title: "You are here"
+                            }}
+                        />
+                    )
+                }
+            </GoogleMap >
+        </div >
     );
 };
 

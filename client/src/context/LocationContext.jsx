@@ -14,6 +14,7 @@ export const LocationProvider = ({ children }) => {
     const [locationError, setLocationError] = useState(null);
 
     const [searchKeyword, setSearchKeyword] = useState('');
+    const [sortBy, setSortBy] = useState('nearest'); // 'nearest', 'rating', 'capacity_high', 'capacity_low', 'alphabetical'
     const [filters, setFilters] = useState({
         minDistance: 0,
         maxDistance: 5000, // Default to max range
@@ -31,7 +32,7 @@ export const LocationProvider = ({ children }) => {
         detectLocation().catch(err => {
             // Silently fail on auto-detect if permission denied or other error
             // The user can manually retry via the Navbar button which shows toast errors
-            console.log("Auto-detect location failed:", err.message);
+            // Auto-detect location failed
         });
     }, []);
 
@@ -87,7 +88,9 @@ export const LocationProvider = ({ children }) => {
 
         setSearchKeyword,
         filters,
-        setFilters
+        setFilters,
+        sortBy,
+        setSortBy
     };
 
     return (

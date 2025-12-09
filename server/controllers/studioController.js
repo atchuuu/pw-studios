@@ -48,6 +48,8 @@ const getStudios = asyncHandler(async (req, res) => {
         sortOption.name = 1;
     } else if (sort === 'capacity') {
         sortOption.capacity = -1; // Descending
+    } else if (sort === 'capacity_asc') {
+        sortOption.capacity = 1; // Ascending
     } else if (sort === 'city') {
         sortOption.city = 1; // Ascending
     }
@@ -264,6 +266,15 @@ const deleteStudio = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Get all unique facilities
+// @route   GET /api/studios/facilities
+// @access  Public
+const getStudioFacilities = asyncHandler(async (req, res) => {
+    const facilities = await Studio.distinct('facilities');
+    // Filter out null, empty strings, and ensure uniqueness/trim if needed (distinct does uniqueness)
+    res.json(facilities.filter(f => f));
+});
+
 module.exports = {
     getStudios,
     getStudioById,
@@ -271,5 +282,6 @@ module.exports = {
     updateStudio,
     deleteStudio,
     getRecommendations,
-    getStudioCities
+    getStudioCities,
+    getStudioFacilities
 };

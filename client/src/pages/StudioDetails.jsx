@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import BrandLoader from '../components/common/BrandLoader';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,7 +55,7 @@ const StudioDetails = ({ studioId, isModal = false }) => {
         return `${import.meta.env.VITE_SERVER_URL}${url}`;
     };
 
-    if (!studio) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
+    if (!studio) return <BrandLoader fullScreen={false} text="Loading Studio Details..." />;
 
     return (
 

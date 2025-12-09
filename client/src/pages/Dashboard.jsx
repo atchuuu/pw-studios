@@ -12,7 +12,7 @@ import StudioDetails from './StudioDetails';
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const { selectedCity, setSelectedCity, userLocation, isNearMe, searchKeyword, setSearchKeyword, filters } = useLocationContext();
+    const { selectedCity, setSelectedCity, userLocation, isNearMe, searchKeyword, setSearchKeyword, filters, sortBy } = useLocationContext();
     const [studios, setStudios] = useState([]);
     const [showMap, setShowMap] = useState(false);
     const [showList, setShowList] = useState(true);
@@ -36,10 +36,21 @@ const Dashboard = () => {
                 if (filters.date) query += `&date=${filters.date}`;
                 if (filters.time) query += `&time=${filters.time}`;
 
-                if (userLocation && userLocation.lat && userLocation.lng) {
-                    query += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
+                // Default Sort / Location Logic
+                if (sortBy === 'nearest') {
+                    if (userLocation && userLocation.lat && userLocation.lng) {
+                        query += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
+                    }
                 } else {
-                    query += `&sort=city`;
+                    // Handle explicit sorts
+                    if (sortBy === 'capacity_high') query += `&sort=capacity`; // Descending
+                    else if (sortBy === 'capacity_low') query += `&sort=capacity_asc`; // Ascending
+                    else if (sortBy === 'alphabetical') query += `&sort=name`; // A-Z by Name
+                }
+
+                // Fallback for location if no sort specified and we have location
+                if (!query.includes('sort') && !query.includes('lat') && userLocation && userLocation.lat) {
+                    query += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
                 }
 
                 if (selectedCity && selectedCity !== 'Near Me') {
@@ -47,13 +58,18 @@ const Dashboard = () => {
                 }
 
                 const studioRes = await axios.get(`${API_BASE_URL}/studios${query}`, config);
-                setStudios(Array.isArray(studioRes.data) ? studioRes.data : []);
+                let fetchedStudios = Array.isArray(studioRes.data) ? studioRes.data : [];
+
+                // Removed slice to allow Map to show all pins. 
+                // We will slice for the list view only during render.
+
+                setStudios(fetchedStudios);
             } catch (error) {
                 console.error(error);
             }
         };
         if (user) fetchData();
-    }, [user, searchKeyword, selectedCity, userLocation, isNearMe, filters]);
+    }, [user, searchKeyword, selectedCity, userLocation, isNearMe, filters, sortBy]);
 
     // Scroll to selected card when selectedStudioId changes
     useEffect(() => {
@@ -65,6 +81,13 @@ const Dashboard = () => {
             });
         }
     }, [selectedStudioId]);
+
+    // List Logic: Show top 12 for "Near Me", otherwise show all
+    const displayedStudios = (isNearMe || selectedCity === 'Near Me')
+        ? studios.slice(0, 12)
+        : studios;
+
+    const listTitle = (isNearMe || selectedCity === 'Near Me') ? 'Nearest Studios' : 'All Studios';
 
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         if (!lat1 || !lon1 || !lat2 || !lon2) return null;
@@ -191,7 +214,7 @@ const Dashboard = () => {
                                                     let closestStudio = null;
                                                     let minDistance = Infinity;
 
-                                                    studios.forEach(studio => {
+                                                    displayedStudios.forEach(studio => {
                                                         const card = cardRefs.current[studio._id];
                                                         if (card) {
                                                             const cardCenter = card.offsetLeft + card.offsetWidth / 2;
@@ -211,7 +234,7 @@ const Dashboard = () => {
                                                 }, 100); // 100ms debounce
                                             }}
                                         >
-                                            {studios.map((studio, index) => (
+                                            {displayedStudios.map((studio, index) => (
                                                 <motion.div
                                                     key={studio._id}
                                                     layoutId={`studio-card-${studio._id}`}
@@ -332,7 +355,7 @@ const Dashboard = () => {
                 {/* Grid View */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     <AnimatePresence>
-                        {Array.isArray(studios) && studios.map((studio, index) => {
+                        {Array.isArray(displayedStudios) && displayedStudios.map((studio, index) => {
                             // Calculate distance if user location is available
                             const distance = userLocation && studio.lat && studio.lng
                                 ? calculateDistance(userLocation.lat, userLocation.lng, studio.lat, studio.lng)
@@ -402,13 +425,15 @@ const Dashboard = () => {
                     </AnimatePresence>
                 </div>
 
-                {studios.length === 0 && (
+                {displayedStudios.length === 0 && (
                     <div className="text-center py-24">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
                             <FaSearch className="text-gray-400 text-2xl" />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No studios found</h3>
-                        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">We couldn't find any studios matching your current filters. Try adjusting your search criteria.</p>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                            {listTitle}
+                        </h2>    <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">We couldn't find any studios matching your current filters. Try adjusting your search criteria.</p>
                         <button
                             onClick={() => {
                                 setSearchKeyword('');

@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../utils/apiConfig';
+import FilterModal from './FilterModal';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -25,6 +26,11 @@ const Navbar = () => {
     const [loadingCities, setLoadingCities] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [citySearch, setCitySearch] = useState('');
+
+    const filteredCities = cities.filter(city =>
+        city.toLowerCase().includes(citySearch.toLowerCase())
+    );
 
     useEffect(() => {
         if (showCityModal) {
@@ -324,6 +330,8 @@ const Navbar = () => {
                                     <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                                     <input
                                         type="text"
+                                        value={citySearch}
+                                        onChange={(e) => setCitySearch(e.target.value)}
                                         placeholder="Search for your city"
                                         className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all shadow-sm"
                                     />
@@ -363,7 +371,7 @@ const Navbar = () => {
                                     <div className="text-center py-12 text-gray-500">Loading cities...</div>
                                 ) : (
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                        {cities.map(city => (
+                                        {filteredCities.map(city => (
                                             <button
                                                 key={city}
                                                 onClick={() => {
@@ -396,129 +404,10 @@ const Navbar = () => {
             </AnimatePresence>
 
             {/* Filter Modal */}
-            <AnimatePresence>
-                {showFilterModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="glass-card rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
-                        >
-                            <div className="p-6 border-b border-gray-100 dark:border-gray-700/50 flex justify-between items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
-                                <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white">Filters</h3>
-                                <button onClick={() => setShowFilterModal(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors">
-                                    <FaTimes />
-                                </button>
-                            </div>
-                            <div className="p-6 space-y-8 bg-white/30 dark:bg-gray-900/30">
-                                {/* Distance Filter */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Distance Range</label>
-                                    <div className="flex gap-2">
-                                        {[
-                                            { label: '< 5km', min: 0, max: 5 },
-                                            { label: '5-10km', min: 5, max: 10 },
-                                            { label: '> 10km', min: 10, max: 5000 }
-                                        ].map((range) => (
-                                            <button
-                                                key={range.label}
-                                                onClick={() => setFilters({ ...filters, minDistance: range.min, maxDistance: range.max })}
-                                                className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-medium border transition-all ${filters.minDistance === range.min && filters.maxDistance === range.max
-                                                    ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/30'
-                                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:border-brand-300 dark:hover:border-brand-700'
-                                                    }`}
-                                            >
-                                                {range.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Availability Filter */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Availability</label>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="relative">
-                                            <input
-                                                type="date"
-                                                value={filters.date}
-                                                onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                                                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
-                                            />
-                                        </div>
-                                        <div className="relative">
-                                            <input
-                                                type="time"
-                                                value={filters.time}
-                                                onChange={(e) => setFilters({ ...filters, time: e.target.value })}
-                                                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Num Studios */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Min Studios</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={filters.numStudios}
-                                        onChange={(e) => setFilters({ ...filters, numStudios: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
-                                    />
-                                </div>
-
-                                {/* Facilities */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Facilities</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {['Wi-Fi', 'Parking', 'AC', 'Green Screen', 'Soundproof'].map((facility) => (
-                                            <button
-                                                key={facility}
-                                                onClick={() => {
-                                                    const newFacilities = filters.facilities.includes(facility)
-                                                        ? filters.facilities.filter(f => f !== facility)
-                                                        : [...filters.facilities, facility];
-                                                    setFilters({ ...filters, facilities: newFacilities });
-                                                }}
-                                                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${filters.facilities.includes(facility)
-                                                    ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-500/20'
-                                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:border-brand-300 dark:hover:border-brand-700'
-                                                    }`}
-                                            >
-                                                {facility}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="p-6 border-t border-gray-100 dark:border-gray-700/50 flex justify-end gap-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md">
-                                <button
-                                    onClick={() => setFilters({
-                                        minDistance: 0,
-                                        maxDistance: 5000,
-                                        date: '',
-                                        time: '',
-                                        numStudios: 0,
-                                        facilities: []
-                                    })}
-                                    className="px-5 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
-                                >
-                                    Reset
-                                </button>
-                                <button
-                                    onClick={() => setShowFilterModal(false)}
-                                    className="px-8 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-semibold shadow-lg shadow-brand-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                >
-                                    Apply Filters
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+            <FilterModal
+                isOpen={showFilterModal}
+                onClose={() => setShowFilterModal(false)}
+            />
         </>
     );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import BrandLoader from '../components/common/BrandLoader';
 import { motion } from 'framer-motion';
 import { FaUser, FaEnvelope, FaShieldAlt, FaCamera, FaSpinner, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
@@ -65,7 +66,7 @@ const UserProfile = () => {
         }
     };
 
-    if (!user) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
+    if (!user) return <BrandLoader fullScreen={false} text="Loading Profile..." />;
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-dark-bg py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
