@@ -200,46 +200,59 @@ const getRecommendations = asyncHandler(async (req, res) => {
 // @desc    Update studio
 // @route   PUT /api/studios/:id
 // @access  Private/Admin
+// @desc    Update studio
+// @route   PUT /api/studios/:id
+// @access  Private/Admin
 const updateStudio = asyncHandler(async (req, res) => {
     const studio = await Studio.findById(req.params.id);
 
-    if (studio) {
-        studio.name = req.body.name || studio.name;
-        studio.location = req.body.location || studio.location;
-        studio.city = req.body.city || studio.city;
-        studio.area = req.body.area || studio.area;
-        studio.address = req.body.address || studio.address;
-        studio.capacity = req.body.capacity || studio.capacity;
-        studio.numStudios = req.body.numStudios || studio.numStudios;
-        studio.pocName = req.body.pocName || studio.pocName;
-        studio.pocEmail = req.body.pocEmail || studio.pocEmail;
-        studio.pocContact = req.body.pocContact || studio.pocContact;
-        studio.facultyCoordinator = req.body.facultyCoordinator || studio.facultyCoordinator;
-        studio.driveLinkInside = req.body.driveLinkInside || studio.driveLinkInside;
-        studio.driveLinkOutside = req.body.driveLinkOutside || studio.driveLinkOutside;
-        studio.googleMapLink = req.body.googleMapLink || studio.googleMapLink;
-        studio.driveLink = req.body.driveLink || studio.driveLink;
-        studio.facilities = req.body.facilities || studio.facilities;
-        studio.images = req.body.images || studio.images;
-        studio.interiorPhotos = req.body.interiorPhotos || studio.interiorPhotos;
-        studio.exteriorPhotos = req.body.exteriorPhotos || studio.exteriorPhotos;
-        studio.coverPhoto = req.body.coverPhoto || studio.coverPhoto;
-
-        if (req.body.lat && req.body.lng) {
-            studio.lat = req.body.lat;
-            studio.lng = req.body.lng;
-            studio.coordinates = {
-                type: 'Point',
-                coordinates: [req.body.lng, req.body.lat]
-            };
-        }
-
-        const updatedStudio = await studio.save();
-        res.json(updatedStudio);
-    } else {
+    if (!studio) {
         res.status(404);
         throw new Error('Studio not found');
     }
+
+    // RBAC Check
+    const isSuperAdmin = req.user.role === 'super_admin';
+    const isAssigned = req.user.assignedStudios && req.user.assignedStudios.some(id => id.toString() === studio._id.toString());
+
+    // Allow super_admin OR assigned studio_admin/faculty_coordinator
+    if (!isSuperAdmin && !isAssigned) {
+        res.status(403);
+        throw new Error('Not authorized to update this studio');
+    }
+
+    studio.name = req.body.name || studio.name;
+    studio.location = req.body.location || studio.location;
+    studio.city = req.body.city || studio.city;
+    studio.area = req.body.area || studio.area;
+    studio.address = req.body.address || studio.address;
+    studio.capacity = req.body.capacity || studio.capacity;
+    studio.numStudios = req.body.numStudios || studio.numStudios;
+    studio.pocName = req.body.pocName || studio.pocName;
+    studio.pocEmail = req.body.pocEmail || studio.pocEmail;
+    studio.pocContact = req.body.pocContact || studio.pocContact;
+    studio.facultyCoordinator = req.body.facultyCoordinator || studio.facultyCoordinator;
+    studio.driveLinkInside = req.body.driveLinkInside || studio.driveLinkInside;
+    studio.driveLinkOutside = req.body.driveLinkOutside || studio.driveLinkOutside;
+    studio.googleMapLink = req.body.googleMapLink || studio.googleMapLink;
+    studio.driveLink = req.body.driveLink || studio.driveLink;
+    studio.facilities = req.body.facilities || studio.facilities;
+    studio.images = req.body.images || studio.images;
+    studio.interiorPhotos = req.body.interiorPhotos || studio.interiorPhotos;
+    studio.exteriorPhotos = req.body.exteriorPhotos || studio.exteriorPhotos;
+    studio.coverPhoto = req.body.coverPhoto || studio.coverPhoto;
+
+    if (req.body.lat && req.body.lng) {
+        studio.lat = req.body.lat;
+        studio.lng = req.body.lng;
+        studio.coordinates = {
+            type: 'Point',
+            coordinates: [req.body.lng, req.body.lat]
+        };
+    }
+
+    const updatedStudio = await studio.save();
+    res.json(updatedStudio);
 });
 
 
@@ -257,13 +270,19 @@ const getStudioCities = asyncHandler(async (req, res) => {
 const deleteStudio = asyncHandler(async (req, res) => {
     const studio = await Studio.findById(req.params.id);
 
-    if (studio) {
-        await studio.deleteOne();
-        res.json({ message: 'Studio removed' });
-    } else {
+    if (!studio) {
         res.status(404);
         throw new Error('Studio not found');
     }
+
+    // RBAC Check: Only Super Admin can delete studios
+    if (req.user.role !== 'super_admin') {
+        res.status(403);
+        throw new Error('Not authorized to delete studios');
+    }
+
+    await studio.deleteOne();
+    res.json({ message: 'Studio removed' });
 });
 
 // @desc    Get all unique facilities

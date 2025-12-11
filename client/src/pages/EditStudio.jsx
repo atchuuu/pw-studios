@@ -162,8 +162,9 @@ const EditStudio = () => {
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Studio Name</label>
+                                <label htmlFor="studio-name" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Studio Name</label>
                                 <input
+                                    id="studio-name"
                                     type="text"
                                     name="name"
                                     value={formData.name}
@@ -173,8 +174,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Studio Code (e.g., NOI)</label>
+                                <label htmlFor="studio-code" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Studio Code (e.g., NOI)</label>
                                 <input
+                                    id="studio-code"
                                     type="text"
                                     name="studioCode"
                                     value={formData.studioCode || ''}
@@ -184,8 +186,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Number of Studios</label>
+                                <label htmlFor="num-studios" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Number of Studios</label>
                                 <input
+                                    id="num-studios"
                                     type="number"
                                     name="numStudios"
                                     value={formData.numStudios || 1}
@@ -195,8 +198,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Address</label>
+                                <label htmlFor="studio-address" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Address</label>
                                 <textarea
+                                    id="studio-address"
                                     name="address"
                                     value={formData.address}
                                     onChange={handleChange}
@@ -206,8 +210,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">City</label>
+                                <label htmlFor="studio-city" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">City</label>
                                 <input
+                                    id="studio-city"
                                     type="text"
                                     name="city"
                                     value={formData.city}
@@ -216,8 +221,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Area</label>
+                                <label htmlFor="studio-area" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Area</label>
                                 <input
+                                    id="studio-area"
                                     type="text"
                                     name="area"
                                     value={formData.area}
@@ -226,8 +232,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">POC Name</label>
+                                <label htmlFor="poc-name" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">POC Name</label>
                                 <input
+                                    id="poc-name"
                                     type="text"
                                     name="pocName"
                                     value={formData.pocName}
@@ -236,8 +243,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">POC Contact</label>
+                                <label htmlFor="poc-contact" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">POC Contact</label>
                                 <input
+                                    id="poc-contact"
                                     type="text"
                                     name="pocContact"
                                     value={formData.pocContact}
@@ -246,8 +254,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">POC Email</label>
+                                <label htmlFor="poc-email" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">POC Email</label>
                                 <input
+                                    id="poc-email"
                                     type="email"
                                     name="pocEmail"
                                     value={formData.pocEmail || ''}
@@ -256,8 +265,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Google Map Link</label>
+                                <label htmlFor="google-map-link" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Google Map Link</label>
                                 <input
+                                    id="google-map-link"
                                     type="text"
                                     name="googleMapLink"
                                     value={formData.googleMapLink}
@@ -266,8 +276,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Latitude</label>
+                                <label htmlFor="studio-lat" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Latitude</label>
                                 <input
+                                    id="studio-lat"
                                     type="number"
                                     step="any"
                                     name="lat"
@@ -277,8 +288,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Longitude</label>
+                                <label htmlFor="studio-lng" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Longitude</label>
                                 <input
+                                    id="studio-lng"
                                     type="number"
                                     step="any"
                                     name="lng"
@@ -288,8 +300,9 @@ const EditStudio = () => {
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Facilities (comma separated)</label>
+                                <label htmlFor="studio-facilities" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Facilities (comma separated)</label>
                                 <input
+                                    id="studio-facilities"
                                     type="text"
                                     name="facilities"
                                     value={formData.facilities}

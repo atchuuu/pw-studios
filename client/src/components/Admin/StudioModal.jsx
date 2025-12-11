@@ -339,10 +339,10 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
                                                                 onError={(e) => { e.target.onerror = null; e.target.src = '/assets/profile-banner.png'; }}
                                                             />
                                                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                                                <label className="cursor-pointer bg-white text-black px-6 py-3 rounded-full font-bold shadow-xl hover:scale-105 transition-transform flex items-center gap-2">
+                                                                <label htmlFor="coverPhoto-upload" className="cursor-pointer bg-white text-black px-6 py-3 rounded-full font-bold shadow-xl hover:scale-105 transition-transform flex items-center gap-2">
                                                                     {uploading ? <FaSpinner className="animate-spin" /> : <FaCloudUploadAlt />}
                                                                     Change Cover
-                                                                    <input type="file" onChange={(e) => handleImageUpload(e, 'coverPhoto')} className="hidden" accept="image/*" disabled={uploading} />
+                                                                    <input id="coverPhoto-upload" name="coverPhoto" type="file" onChange={(e) => handleImageUpload(e, 'coverPhoto')} className="hidden" accept="image/*" disabled={uploading} />
                                                                 </label>
                                                             </div>
                                                         </div>
@@ -352,9 +352,9 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
                                                     <div>
                                                         <div className="flex justify-between items-center mb-4">
                                                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Interior Photos</label>
-                                                            <label className="text-xs font-bold text-brand-600 cursor-pointer hover:underline flex items-center gap-1">
+                                                            <label htmlFor="interiorPhotos-upload" className="text-xs font-bold text-brand-600 cursor-pointer hover:underline flex items-center gap-1">
                                                                 <FaCloudUploadAlt /> Upload
-                                                                <input type="file" multiple onChange={(e) => handleImageUpload(e, 'interiorPhotos')} className="hidden" accept="image/*" disabled={uploading} />
+                                                                <input id="interiorPhotos-upload" name="interiorPhotos" type="file" multiple onChange={(e) => handleImageUpload(e, 'interiorPhotos')} className="hidden" accept="image/*" disabled={uploading} />
                                                             </label>
                                                         </div>
                                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -362,7 +362,7 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
                                                                 <div key={i} className="group relative h-32 rounded-2xl overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 shadow-sm">
                                                                     <img src={getImageSrc(url.trim())} alt={`Interior ${i}`} className="h-full w-full object-cover" />
                                                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                        <button onClick={() => handleRemoveImage('interiorPhotos', i)} className="p-2 bg-white/20 text-white rounded-xl backdrop-blur-md hover:bg-red-500/80 transition-colors">
+                                                                        <button type="button" onClick={() => handleRemoveImage('interiorPhotos', i)} className="p-2 bg-white/20 text-white rounded-xl backdrop-blur-md hover:bg-red-500/80 transition-colors">
                                                                             <FaTrash size={14} />
                                                                         </button>
                                                                     </div>
@@ -381,9 +381,9 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
                                                     <div>
                                                         <div className="flex justify-between items-center mb-4">
                                                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Exterior Photos</label>
-                                                            <label className="text-xs font-bold text-brand-600 cursor-pointer hover:underline flex items-center gap-1">
+                                                            <label htmlFor="exteriorPhotos-upload" className="text-xs font-bold text-brand-600 cursor-pointer hover:underline flex items-center gap-1">
                                                                 <FaCloudUploadAlt /> Upload
-                                                                <input type="file" multiple onChange={(e) => handleImageUpload(e, 'exteriorPhotos')} className="hidden" accept="image/*" disabled={uploading} />
+                                                                <input id="exteriorPhotos-upload" name="exteriorPhotos" type="file" multiple onChange={(e) => handleImageUpload(e, 'exteriorPhotos')} className="hidden" accept="image/*" disabled={uploading} />
                                                             </label>
                                                         </div>
                                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -391,7 +391,7 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
                                                                 <div key={i} className="group relative h-32 rounded-2xl overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 shadow-sm">
                                                                     <img src={getImageSrc(url.trim())} alt={`Exterior ${i}`} className="h-full w-full object-cover" />
                                                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                        <button onClick={() => handleRemoveImage('exteriorPhotos', i)} className="p-2 bg-white/20 text-white rounded-xl backdrop-blur-md hover:bg-red-500/80 transition-colors">
+                                                                        <button type="button" onClick={() => handleRemoveImage('exteriorPhotos', i)} className="p-2 bg-white/20 text-white rounded-xl backdrop-blur-md hover:bg-red-500/80 transition-colors">
                                                                             <FaTrash size={14} />
                                                                         </button>
                                                                     </div>
@@ -451,7 +451,7 @@ const SectionHeader = ({ title, subtitle }) => (
 
 const InputGroup = ({ label, icon, value, name, onChange, type = "text", placeholder, required, textarea, rows, mono, uppercase, noBorder, width }) => (
     <div className={`group relative ${width === 'half' ? 'col-span-1' : ''}`}>
-        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5 ml-1 transition-colors group-focus-within:text-brand-600 dark:group-focus-within:text-brand-400">
+        <label htmlFor={name} className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5 ml-1 transition-colors group-focus-within:text-brand-600 dark:group-focus-within:text-brand-400">
             {label} {required && <span className="text-red-500">*</span>}
         </label>
         <div className={`relative flex items-center bg-gray-50 dark:bg-[#111] rounded-xl overflow-hidden transition-all duration-200 ${noBorder ? '' : 'border border-gray-200 dark:border-white/10 group-focus-within:border-brand-500 dark:group-focus-within:border-brand-500 group-focus-within:ring-4 group-focus-within:ring-brand-500/10 dark:group-focus-within:ring-brand-400/10 group-focus-within:bg-white dark:group-focus-within:bg-[#000]'}`}>
@@ -462,6 +462,7 @@ const InputGroup = ({ label, icon, value, name, onChange, type = "text", placeho
             )}
             {textarea ? (
                 <textarea
+                    id={name}
                     name={name}
                     value={value}
                     onChange={onChange}
@@ -471,6 +472,7 @@ const InputGroup = ({ label, icon, value, name, onChange, type = "text", placeho
                 />
             ) : (
                 <input
+                    id={name}
                     type={type}
                     name={name}
                     value={value}

@@ -29,8 +29,12 @@ const configurePassport = () => {
                         if (!user.googleId) {
                             user.googleId = profile.id;
                         }
-                        // Update profile picture if not present or if it's from google
-                        if (!user.profilePicture && profile.photos && profile.photos[0]) {
+                        // Update profile picture if not present or if it's a google image (to refresh expired URLs)
+                        if (
+                            (!user.profilePicture || user.profilePicture.includes('googleusercontent.com')) &&
+                            profile.photos &&
+                            profile.photos[0]
+                        ) {
                             user.profilePicture = profile.photos[0].value;
                         }
                         await user.save();

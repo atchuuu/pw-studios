@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema({
     },
     location: { type: String }, // e.g., "Noida", "Delhi"
     profilePicture: { type: String },
+    assignedStudios: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Studio' }]
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

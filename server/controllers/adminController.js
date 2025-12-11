@@ -5,7 +5,21 @@ const { User, Studio } = require('../models');
 // @route   GET /api/admin/users
 // @access  Private/SuperAdmin
 const getAllUsers = asyncHandler(async (req, res) => {
-    const users = await User.find({}).select('-password');
+    let query = {};
+
+    // RBAC: Strict filtering for non-super admins
+    if (req.user.role !== 'super_admin') {
+        const myStudioIds = req.user.assignedStudios || [];
+
+        query = {
+            // 1. Only show specific roles (Studio Admin & Faculty Coordinator)
+            role: { $in: ['studio_admin', 'faculty_coordinator'] },
+            // 2. Only show users who are assigned to at least one of MY studios
+            assignedStudios: { $in: myStudioIds }
+        };
+    }
+
+    const users = await User.find(query).select('-password').populate('assignedStudios', 'name studioCode');
     res.json(users);
 });
 
@@ -13,7 +27,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/users
 // @access  Private/SuperAdmin
 const createUser = asyncHandler(async (req, res) => {
-    const { name, email, password, role, location } = req.body;
+    const { name, email, password, role, location, assignedStudios } = req.body;
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -21,7 +35,7 @@ const createUser = asyncHandler(async (req, res) => {
         throw new Error('User already exists');
     }
 
-    const user = await User.create({ name, email, password, role, location });
+    const user = await User.create({ name, email, password, role, location, assignedStudios });
 
     if (user) {
         res.status(201).json({
@@ -29,6 +43,7 @@ const createUser = asyncHandler(async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            assignedStudios: user.assignedStudios
         });
     } else {
         res.status(400);
@@ -62,18 +77,24 @@ const updateUser = asyncHandler(async (req, res) => {
         user.email = req.body.email || user.email;
         user.role = req.body.role || user.role;
         user.location = req.body.location || user.location;
+        if (req.body.assignedStudios) {
+            user.assignedStudios = req.body.assignedStudios;
+        }
 
         if (req.body.password) {
             user.password = req.body.password;
         }
 
         const updatedUser = await user.save();
+        // re-populate for response
+        await updatedUser.populate('assignedStudios', 'name studioCode');
 
         res.json({
             _id: updatedUser._id,
             name: updatedUser.name,
             email: updatedUser.email,
             role: updatedUser.role,
+            assignedStudios: updatedUser.assignedStudios,
         });
     } else {
         res.status(404);

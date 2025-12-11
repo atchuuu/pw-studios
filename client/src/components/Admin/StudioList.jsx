@@ -106,6 +106,42 @@ const StudioList = () => {
         </div>
     );
 
+    // Strict filter for display
+    const displayedStudios = user.role === 'super_admin'
+        ? studios
+        : studios.filter(s =>
+            user.assignedStudios &&
+            user.assignedStudios.some(assigned => (assigned._id || assigned) === s._id)
+        );
+
+    // Helper to check edit access
+    const hasEditAccess = (studio) => {
+        if (user.role === 'super_admin') return true;
+        if (['studio_admin', 'faculty_coordinator'].includes(user.role)) {
+            return user.assignedStudios && user.assignedStudios.some(s => (s._id || s) === studio._id);
+        }
+        return false;
+    };
+
+    if (loading) return (
+        <div>
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    {/* Skeleton for Header Text */}
+                    <div className="h-8 w-48 bg-gray-200 dark:bg-white/5 rounded-lg animate-pulse mb-2"></div>
+                    <div className="h-4 w-64 bg-gray-200 dark:bg-white/5 rounded-lg animate-pulse"></div>
+                </div>
+                {/* Skeleton for Button */}
+                <div className="h-12 w-40 bg-gray-200 dark:bg-white/5 rounded-xl animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <StudioCardSkeleton key={i} />
+                ))}
+            </div>
+        </div>
+    );
+
     return (
         <div>
             <div className="flex justify-between items-center mb-8">
@@ -113,17 +149,19 @@ const StudioList = () => {
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Studios</h2>
                     <p className="text-gray-500 dark:text-gray-400">Manage all studio locations</p>
                 </div>
-                <button
-                    onClick={handleAdd}
-                    className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/30 transform hover:scale-105 active:scale-95 duration-200"
-                >
-                    <FaPlus /> Add New Studio
-                </button>
+                {user.role === 'super_admin' && (
+                    <button
+                        onClick={handleAdd}
+                        className="flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition-colors shadow-lg shadow-brand-600/30 transform hover:scale-105 active:scale-95 duration-200"
+                    >
+                        <FaPlus /> Add New Studio
+                    </button>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence>
-                    {studios.map((studio) => (
+                    {displayedStudios.map((studio) => (
                         <motion.div
                             key={studio._id}
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -142,13 +180,15 @@ const StudioList = () => {
                                     </div>
                                 )}
                                 <div className="absolute top-2 right-2 flex gap-2 translate-y-[-10px] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                    <button
-                                        onClick={() => handleEdit(studio)}
-                                        className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-brand-600 hover:text-brand-500 shadow-lg backdrop-blur-sm"
-                                        title="Edit Studio"
-                                    >
-                                        <FaEdit size={14} />
-                                    </button>
+                                    {hasEditAccess(studio) && (
+                                        <button
+                                            onClick={() => handleEdit(studio)}
+                                            className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-brand-600 hover:text-brand-500 shadow-lg backdrop-blur-sm"
+                                            title="Edit Studio"
+                                        >
+                                            <FaEdit size={14} />
+                                        </button>
+                                    )}
                                     {user.role === 'super_admin' && (
                                         <button
                                             onClick={() => handleDelete(studio._id)}

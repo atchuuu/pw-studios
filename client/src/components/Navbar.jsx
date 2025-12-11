@@ -27,6 +27,7 @@ const Navbar = () => {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [citySearch, setCitySearch] = useState('');
+    const [imageError, setImageError] = useState(false);
 
     const filteredCities = cities.filter(city =>
         city.toLowerCase().includes(citySearch.toLowerCase())
@@ -146,6 +147,8 @@ const Navbar = () => {
                                         <FaSearch className="text-gray-400 group-focus-within:text-brand-500 transition-colors" />
                                     </div>
                                     <input
+                                        id="studio-search"
+                                        name="keyword"
                                         type="text"
                                         value={searchKeyword}
                                         onChange={(e) => setSearchKeyword(e.target.value)}
@@ -242,11 +245,12 @@ const Navbar = () => {
                                         className="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                                     >
                                         <div className="w-12 h-12 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 font-bold text-xl overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-sm">
-                                            {user.profilePicture ? (
+                                            {user.profilePicture && !imageError ? (
                                                 <img
                                                     src={user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/assets') ? user.profilePicture : `${API_BASE_URL}${user.profilePicture}`}
                                                     alt={user.name}
                                                     className="w-full h-full object-cover"
+                                                    onError={() => setImageError(true)}
                                                 />
                                             ) : (
                                                 user.name ? user.name.charAt(0) : 'U'
@@ -274,7 +278,7 @@ const Navbar = () => {
                                     >
                                         <FaCalendarAlt className="text-gray-400" /> My Bookings
                                     </Link>
-                                    {user && (user.role === 'super_admin' || user.role === 'studio_admin') && (
+                                    {user && (user.role === 'super_admin' || user.role === 'studio_admin' || user.role === 'faculty_coordinator') && (
                                         <Link
                                             to="/admin"
                                             onClick={() => setShowSidebar(false)}
@@ -329,6 +333,8 @@ const Navbar = () => {
                                 <div className="relative">
                                     <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                                     <input
+                                        id="city-search"
+                                        name="cityKeyword"
                                         type="text"
                                         value={citySearch}
                                         onChange={(e) => setCitySearch(e.target.value)}

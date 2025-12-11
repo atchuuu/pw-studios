@@ -10,7 +10,7 @@ const AdminDashboard = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('studios');
 
-    if (user.role !== 'super_admin' && user.role !== 'studio_admin') {
+    if (!['super_admin', 'studio_admin', 'faculty_coordinator'].includes(user.role)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl">
@@ -22,9 +22,9 @@ const AdminDashboard = () => {
     }
 
     const tabs = [
-        { id: 'studios', label: 'Studios', icon: <FaBuilding />, roles: ['super_admin', 'studio_admin'] },
-        { id: 'users', label: 'Users', icon: <FaUsers />, roles: ['super_admin'] },
-        { id: 'bookings', label: 'Bookings', icon: <FaCalendarCheck />, roles: ['super_admin'] },
+        { id: 'studios', label: 'Studios', icon: <FaBuilding />, roles: ['super_admin', 'studio_admin', 'faculty_coordinator'] },
+        { id: 'users', label: 'Users', icon: <FaUsers />, roles: ['super_admin', 'studio_admin', 'faculty_coordinator'] },
+        { id: 'bookings', label: 'Bookings', icon: <FaCalendarCheck />, roles: ['super_admin', 'studio_admin', 'faculty_coordinator'] },
     ];
 
     const allowedTabs = tabs.filter(tab => tab.roles.includes(user.role));
@@ -66,8 +66,8 @@ const AdminDashboard = () => {
                         transition={{ duration: 0.3 }}
                     >
                         {activeTab === 'studios' && <StudioList />}
-                        {activeTab === 'users' && user.role === 'super_admin' && <UserList />}
-                        {activeTab === 'bookings' && user.role === 'super_admin' && <AllBookings />}
+                        {activeTab === 'users' && <UserList />}
+                        {activeTab === 'bookings' && <AllBookings />}
                     </motion.div>
                 </AnimatePresence>
             </div>

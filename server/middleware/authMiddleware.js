@@ -20,6 +20,25 @@ const protect = async (req, res, next) => {
     }
 };
 
+// Strict Super Admin
+const superAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'super_admin') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Not authorized as super admin' });
+    }
+};
+
+// Staff Access (Super, Studio Admin, Faculty Coordinator)
+const staffAccess = (req, res, next) => {
+    if (req.user && ['super_admin', 'studio_admin', 'faculty_coordinator'].includes(req.user.role)) {
+        next();
+    } else {
+        res.status(403).json({ message: 'Not authorized' });
+    }
+};
+
+// Legacy Admin (Super + Studio Admin) - Keeping for potential other usages, strictly defined in previous code
 const admin = (req, res, next) => {
     if (req.user && (req.user.role === 'studio_admin' || req.user.role === 'super_admin')) {
         next();
@@ -28,4 +47,4 @@ const admin = (req, res, next) => {
     }
 };
 
-module.exports = { protect, admin };
+module.exports = { protect, admin, superAdmin, staffAccess };

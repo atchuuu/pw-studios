@@ -11,6 +11,7 @@ import profileBanner from '../assets/profile-banner.png';
 const UserProfile = () => {
     const { user, updateUser } = useAuth(); // Assuming login updates the user state, or we might need a dedicated updateUser function in context
     const [uploading, setUploading] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
@@ -90,11 +91,12 @@ const UserProfile = () => {
                     <div className="relative -mt-20 text-center px-6">
                         <div className="relative inline-block">
                             <div className="w-40 h-40 rounded-full bg-white dark:bg-dark-card p-1.5 shadow-2xl mx-auto relative group ring-4 ring-white/10 dark:ring-black/20">
-                                {user.profilePicture ? (
+                                {user.profilePicture && !imageError ? (
                                     <img
                                         src={user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/assets') ? user.profilePicture : `${import.meta.env.VITE_SERVER_URL}${user.profilePicture}`}
                                         alt={user.name}
                                         className="w-full h-full rounded-full object-cover"
+                                        onError={() => setImageError(true)}
                                     />
                                 ) : (
                                     <div className="w-full h-full rounded-full bg-gradient-to-br from-brand-100 to-brand-50 dark:from-brand-900/40 dark:to-brand-800/20 flex items-center justify-center text-5xl font-bold text-brand-500 dark:text-brand-400">

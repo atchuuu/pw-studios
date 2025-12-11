@@ -11,6 +11,10 @@ const bookingSchema = mongoose.Schema({
         enum: ['confirmed', 'cancelled', 'completed'],
         default: 'confirmed'
     },
+    cancellationReason: {
+        type: String,
+        required: false
+    },
 }, { timestamps: true });
 
 const Booking = mongoose.model('Booking', bookingSchema);

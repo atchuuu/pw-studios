@@ -121,8 +121,8 @@ const FilterModal = ({ isOpen, onClose }) => {
                                         key={cat.id}
                                         onClick={() => setActiveCategory(cat.id)}
                                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeCategory === cat.id
-                                                ? 'bg-white dark:bg-white/10 text-brand-600 dark:text-brand-400 shadow-lg shadow-brand-500/10 scale-[1.02]'
-                                                : 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5'
+                                            ? 'bg-white dark:bg-white/10 text-brand-600 dark:text-brand-400 shadow-lg shadow-brand-500/10 scale-[1.02]'
+                                            : 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5'
                                             }`}
                                     >
                                         <span className={activeCategory === cat.id ? 'text-brand-500' : 'text-gray-400'}>{cat.icon}</span>
@@ -140,8 +140,8 @@ const FilterModal = ({ isOpen, onClose }) => {
                                             key={cat.id}
                                             onClick={() => setActiveCategory(cat.id)}
                                             className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold snap-start border transition-all ${activeCategory === cat.id
-                                                    ? 'bg-brand-600 text-white border-brand-600 shadow-md'
-                                                    : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-transparent'
+                                                ? 'bg-brand-600 text-white border-brand-600 shadow-md'
+                                                : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-transparent'
                                                 }`}
                                         >
                                             {cat.icon} {cat.label}
@@ -171,8 +171,8 @@ const FilterModal = ({ isOpen, onClose }) => {
                                                         key={opt.id}
                                                         onClick={() => setLocalSortBy(opt.id)}
                                                         className={`relative p-4 rounded-2xl border text-left transition-all duration-200 group ${localSortBy === opt.id
-                                                                ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/10 ring-1 ring-brand-500'
-                                                                : 'border-gray-200 dark:border-white/10 hover:border-brand-300 dark:hover:border-white/20 hover:bg-gray-50 dark:hover:bg-white/5'
+                                                            ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/10 ring-1 ring-brand-500'
+                                                            : 'border-gray-200 dark:border-white/10 hover:border-brand-300 dark:hover:border-white/20 hover:bg-gray-50 dark:hover:bg-white/5'
                                                             }`}
                                                     >
                                                         <div className="flex justify-between items-start">
@@ -208,6 +208,8 @@ const FilterModal = ({ isOpen, onClose }) => {
                                                     <span className="text-brand-600 dark:text-brand-400">{localFilters.maxDistance > 100 ? 'Any' : `${localFilters.maxDistance} km`}</span>
                                                 </div>
                                                 <input
+                                                    id="distance-range"
+                                                    name="maxDistance"
                                                     type="range"
                                                     min="1"
                                                     max="50"
@@ -225,11 +227,12 @@ const FilterModal = ({ isOpen, onClose }) => {
                                                 <div className="mt-4 flex gap-2">
                                                     {[5, 10, 20, 5000].map(dist => (
                                                         <button
+                                                            type="button" // Explicitly type button to avoid form submission if ever inside form
                                                             key={dist}
                                                             onClick={() => setLocalFilters({ ...localFilters, maxDistance: dist })}
                                                             className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${localFilters.maxDistance === dist
-                                                                    ? 'bg-brand-600 text-white border-brand-600'
-                                                                    : 'bg-white dark:bg-transparent border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-brand-300'
+                                                                ? 'bg-brand-600 text-white border-brand-600'
+                                                                : 'bg-white dark:bg-transparent border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-brand-300'
                                                                 }`}
                                                         >
                                                             {dist >= 5000 ? 'Any' : `< ${dist}km`}
@@ -279,8 +282,8 @@ const FilterModal = ({ isOpen, onClose }) => {
                                                                 setLocalFilters({ ...localFilters, facilities: newFacilities });
                                                             }}
                                                             className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-all duration-200 ${localFilters.facilities.includes(facility)
-                                                                    ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/20 transform scale-[1.02]'
-                                                                    : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
+                                                                ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/20 transform scale-[1.02]'
+                                                                : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'
                                                                 }`}
                                                         >
                                                             {facility}
@@ -304,8 +307,10 @@ const FilterModal = ({ isOpen, onClose }) => {
                                             <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Check Availability</h3>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Date</label>
+                                                    <label htmlFor="filter-date" className="text-xs font-semibold text-gray-500 mb-1 block">Date</label>
                                                     <input
+                                                        id="filter-date"
+                                                        name="date"
                                                         type="date"
                                                         value={localFilters.date}
                                                         onChange={(e) => setLocalFilters({ ...localFilters, date: e.target.value })}
@@ -313,8 +318,10 @@ const FilterModal = ({ isOpen, onClose }) => {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs font-semibold text-gray-500 mb-1 block">Time</label>
+                                                    <label htmlFor="filter-time" className="text-xs font-semibold text-gray-500 mb-1 block">Time</label>
                                                     <input
+                                                        id="filter-time"
+                                                        name="time"
                                                         type="time"
                                                         value={localFilters.time}
                                                         onChange={(e) => setLocalFilters({ ...localFilters, time: e.target.value })}

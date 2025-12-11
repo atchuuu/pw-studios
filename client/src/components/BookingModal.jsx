@@ -139,6 +139,17 @@ const TimePicker = ({ label, value, onChange, minTime, badge }) => {
     useEffect(() => {
         // Validation: If current selection becomes invalid due to minTime change, reset it
         if (minTime) {
+            // Check if CURRENT PROP value is already valid (trust parent if it just updated)
+            if (value) {
+                const [vH, vM] = value.split(':').map(Number);
+                const minHVal = parseInt(minTime.split(':')[0]);
+                const minMVal = parseInt(minTime.split(':')[1]);
+
+                if (vH > minHVal || (vH === minHVal && vM >= minMVal)) {
+                    return; // Value is valid, skip correction (prevents race condition)
+                }
+            }
+
             const currH = parseInt(selectedHour);
             const currM = parseInt(selectedMinute);
 
@@ -153,7 +164,7 @@ const TimePicker = ({ label, value, onChange, minTime, badge }) => {
                 onChange(newTime);
             }
         }
-    }, [minTime, selectedHour, selectedMinute]);
+    }, [minTime, selectedHour, selectedMinute, value]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -357,7 +368,7 @@ const BookingModal = ({ studio, isOpen, onClose }) => {
 
     const handleSlotClick = (hour) => {
         const startStr = hour.toString().padStart(2, '0') + ':00';
-        const endStr = (hour + 1).toString().padStart(2, '0') + ':00';
+        const endStr = hour.toString().padStart(2, '0') + ':50';
         setStartTime(startStr);
         setEndTime(endStr);
     };

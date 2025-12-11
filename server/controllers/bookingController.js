@@ -145,6 +145,22 @@ const getAllBookings = asyncHandler(async (req, res) => {
         };
     }
 
+    // RBAC: If not super_admin, restrict to assigned studios
+    if (req.user.role !== 'super_admin') {
+        const assignedStudioIds = req.user.assignedStudios || [];
+        // If query.studio already exists (from location filter), we need to find the intersection
+        if (query.studio) {
+            // query.studio is currently { $in: studioIds }
+            const requestedIds = query.studio.$in.map(id => id.toString());
+            const allowedIds = assignedStudioIds.map(id => (id._id || id).toString());
+            const intersection = requestedIds.filter(id => allowedIds.includes(id));
+            query.studio = { $in: intersection };
+        } else {
+            // No location filter, just apply assigned studios constraint
+            query.studio = { $in: assignedStudioIds };
+        }
+    }
+
     const bookings = await Booking.find(query)
         .populate('user', 'name email')
         .populate('studio', 'name location')
@@ -175,6 +191,9 @@ const cancelBooking = asyncHandler(async (req, res) => {
 
     if (isSuperAdmin || isStudioAdmin || isBookingOwner) {
         booking.status = 'cancelled';
+        if (req.body.reason) {
+            booking.cancellationReason = req.body.reason;
+        }
         const updatedBooking = await booking.save();
         res.json(updatedBooking);
     } else {

@@ -52,6 +52,7 @@ const getMe = asyncHandler(async (req, res) => {
             email: user.email,
             role: user.role,
             profilePicture: user.profilePicture,
+            assignedStudios: user.assignedStudios,
             // token is already on client
         });
     } else {

@@ -5,7 +5,7 @@ import { FaGoogle } from 'react-icons/fa';
 import pwLogo from '../assets/pw-logo.png';
 import { API_BASE_URL } from '../utils/apiConfig';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
-
+import { useLocation } from 'react-router-dom';
 // Doodle Components
 const AtomDoodle = ({ className, ...props }) => (
     <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2" className={className} {...props}>
