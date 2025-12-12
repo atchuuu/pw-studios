@@ -282,13 +282,10 @@ const BookingModal = ({ studio, isOpen, onClose }) => {
     useEffect(() => {
         if (!isOpen) return;
 
-        // 1. Set Date to Today (Local)
         setDate(getLocalDateString(new Date()));
-
-        // 2. Set Unit
         setSelectedUnit(studio?.studioNumbers?.[0] || null);
 
-        // 3. Default Time: Current time rounded to next 5 minutes
+        // Default: Current rounded to next 5 mins
         const now = new Date();
         const start = new Date(now);
         const minutes = Math.ceil(now.getMinutes() / 5) * 5;

@@ -22,11 +22,9 @@ const StudioDetails = ({ studioId, isModal = false }) => {
     const [showBookingModal, setShowBookingModal] = useState(!!location.state?.openBooking);
     const [selectedImage, setSelectedImage] = useState(null); // For lightbox
 
-    // Check for openBooking state from navigation (e.g. from Dashboard "Book Now")
-    // Clear the navigation state ensuring it doesn't persist inappropriately
+    // Initialize state from location if available
     useEffect(() => {
         if (location.state?.openBooking) {
-            // Clear state to prevent reopening on reload/back, but we already set initial state above
             window.history.replaceState({}, document.title);
         }
     }, [location]);

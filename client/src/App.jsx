@@ -28,12 +28,29 @@ const PrivateRoute = ({ children }) => {
     return user ? children : <Navigate to="/login" />;
 };
 
+import Sidebar from './components/Sidebar';
+import PageHeader from './components/PageHeader';
+
 const Layout = ({ children }) => {
     const location = useLocation();
     const isLoginPage = location.pathname === '/login';
+    const isDashboard = location.pathname === '/' || location.pathname === '/dashboard';
+
+    // State for Sidebar
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    if (isLoginPage) return <>{children}</>;
+
     return (
         <>
-            {!isLoginPage && <Navbar />}
+            {isDashboard ? (
+                <Navbar onOpenSidebar={() => setIsSidebarOpen(true)} />
+            ) : (
+                <PageHeader onOpenSidebar={() => setIsSidebarOpen(true)} />
+            )}
+
+            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
             {children}
         </>
     );

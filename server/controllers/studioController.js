@@ -125,9 +125,7 @@ const generateUniqueStudioCode = async (city) => {
 // @desc    Create a studio
 // @route   POST /api/studios
 // @access  Private/Admin
-// @desc    Create a studio
-// @route   POST /api/studios
-// @access  Private/Admin
+
 const createStudio = asyncHandler(async (req, res) => {
     const { name, description, address, city, area, lat, lng, numStudios, interiorPhotos, exteriorPhotos, pocEmail, googleMapLink, facilities } = req.body;
 
