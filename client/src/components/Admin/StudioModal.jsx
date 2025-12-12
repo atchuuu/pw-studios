@@ -30,6 +30,7 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
     // Initial State
     const initialState = {
         name: '',
+        description: '',
         studioCode: '',
         numStudios: 1,
         address: '',
@@ -57,6 +58,7 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
                 setFormData({
                     ...initialState,
                     ...studio,
+                    description: studio.description || '',
                     lat: studio.lat || (studio.coordinates?.coordinates ? studio.coordinates.coordinates[1] : ''),
                     lng: studio.lng || (studio.coordinates?.coordinates ? studio.coordinates.coordinates[0] : ''),
                     facilities: Array.isArray(studio.facilities) ? studio.facilities.join(', ') : (studio.facilities || ''),
@@ -266,6 +268,9 @@ const StudioModal = ({ isOpen, onClose, studio, onSave }) => {
                                                 <div className="space-y-8 animate-in">
                                                     <SectionHeader title="Studio Identity" subtitle="Define the core identity and capacity of the studio." />
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                        <div className="col-span-2">
+                                                            <InputGroup label="Description" icon={<FaList />} value={formData.description} name="description" onChange={handleChange} textarea placeholder="Describe the studio (e.g. equipment, vibe)..." />
+                                                        </div>
                                                         <InputGroup label="Studio Name" icon={<FaBuilding />} value={formData.name} name="name" onChange={handleChange} placeholder="e.g. Noida HQ Studio" required />
                                                         <InputGroup label="Studio Code" icon={<FaGlobe />} value={formData.studioCode} name="studioCode" onChange={handleChange} placeholder="NOI" required uppercase mono />
                                                         <InputGroup label="Total Rooms" icon={<FaList />} type="number" value={formData.numStudios} name="numStudios" onChange={handleChange} required min="1" width="half" />

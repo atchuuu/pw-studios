@@ -14,6 +14,7 @@ const studioSchema = mongoose.Schema({
     lng: { type: Number }, // Keeping for backward compatibility
     capacity: { type: Number }, // Deprecated, but keeping optional for now
     numStudios: { type: Number, default: 1 },
+    description: { type: String }, // Dynamic studio description
     studioCode: { type: String }, // e.g., "NOI"
     studioNumbers: [{ type: String }], // e.g., ["NOI-001", "NOI-002"]
     pocName: { type: String },

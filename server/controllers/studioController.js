@@ -129,7 +129,7 @@ const generateUniqueStudioCode = async (city) => {
 // @route   POST /api/studios
 // @access  Private/Admin
 const createStudio = asyncHandler(async (req, res) => {
-    const { name, address, city, area, lat, lng, numStudios, interiorPhotos, exteriorPhotos, pocEmail, googleMapLink, facilities } = req.body;
+    const { name, description, address, city, area, lat, lng, numStudios, interiorPhotos, exteriorPhotos, pocEmail, googleMapLink, facilities } = req.body;
 
     const studioCode = await generateUniqueStudioCode(city);
 
@@ -141,6 +141,7 @@ const createStudio = asyncHandler(async (req, res) => {
 
     const studio = new Studio({
         name,
+        description,
         address,
         city,
         area,
@@ -222,6 +223,7 @@ const updateStudio = asyncHandler(async (req, res) => {
     }
 
     studio.name = req.body.name || studio.name;
+    studio.description = req.body.description || studio.description;
     studio.location = req.body.location || studio.location;
     studio.city = req.body.city || studio.city;
     studio.area = req.body.area || studio.area;

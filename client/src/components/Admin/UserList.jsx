@@ -18,6 +18,19 @@ const UserList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedStudioIds, setSelectedStudioIds] = useState([]);
+    const [expandedRows, setExpandedRows] = useState(new Set()); // Track expanded user rows
+
+    const toggleRowExpansion = (userId) => {
+        setExpandedRows(prev => {
+            const next = new Set(prev);
+            if (next.has(userId)) {
+                next.delete(userId);
+            } else {
+                next.add(userId);
+            }
+            return next;
+        });
+    };
 
     useEffect(() => {
         fetchUsers();
@@ -210,37 +223,39 @@ const UserList = () => {
                                             {user.role.replace('_', ' ')}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4">
                                         {(user.role === 'studio_admin' || user.role === 'faculty_coordinator') ? (
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-sm text-gray-600 dark:text-gray-300">
-                                                    {user.assignedStudios && user.assignedStudios.length > 0
-                                                        ? `${user.assignedStudios.length} Assigned`
-                                                        : 'No studios assigned'}
-                                                </span>
-                                                {user.assignedStudios && user.assignedStudios.length > 0 && (
-                                                    <details className="group">
-                                                        <summary className="text-xs text-primary cursor-pointer hover:underline focus:outline-none list-none">
-                                                            View Studios
-                                                        </summary>
-                                                        <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 max-w-[200px]">
-                                                            <ul className="list-disc pl-4 space-y-1">
-                                                                {user.assignedStudios.map((studio, idx) => (
-                                                                    <li key={idx}>
-                                                                        {studio.name || 'Unknown Studio'}
-                                                                        <span className="block text-[10px] opacity-70">{studio.studioCode}</span>
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    </details>
+                                            <div className="flex flex-col gap-2 min-w-[200px]">
+                                                {user.assignedStudios && user.assignedStudios.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {user.assignedStudios.slice(0, expandedRows.has(user._id) ? undefined : 2).map((studio, idx) => (
+                                                            <div key={idx} title={studio.studioCode} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300 border border-gray-200 dark:border-gray-600 shadow-sm">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-primary/70"></span>
+                                                                {studio.name}
+                                                            </div>
+                                                        ))}
+                                                        {user.assignedStudios.length > 2 && (
+                                                            <button
+                                                                onClick={() => toggleRowExpansion(user._id)}
+                                                                className="text-xs font-medium text-primary hover:text-primary-dark hover:underline py-1 px-1 transition-colors"
+                                                            >
+                                                                {expandedRows.has(user._id) ? 'Show Less' : `+${user.assignedStudios.length - 2} More`}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400 italic flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                                                        No studios assigned
+                                                    </span>
                                                 )}
 
                                                 {currentUser.role === 'super_admin' && (
                                                     <button
                                                         onClick={() => openAssignmentModal(user)}
-                                                        className="text-xs text-primary hover:text-primary-dark font-medium underline text-left mt-1"
+                                                        className="text-[10px] text-gray-400 hover:text-primary font-medium uppercase tracking-wider flex items-center gap-1 mt-1 transition-colors"
                                                     >
+                                                        <FaUserShield size={10} />
                                                         Manage Access
                                                     </button>
                                                 )}

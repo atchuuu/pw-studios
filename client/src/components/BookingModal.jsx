@@ -242,7 +242,14 @@ const TimePicker = ({ label, value, onChange, minTime, badge }) => {
 const BookingModal = ({ studio, isOpen, onClose }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    // Helper for Local Date String (YYYY-MM-DD)
+    const getLocalDateString = (dateObj) => {
+        const offset = dateObj.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(dateObj.getTime() - offset).toISOString().slice(0, 10);
+        return localISOTime;
+    };
+
+    const [date, setDate] = useState(getLocalDateString(new Date()));
     const [selectedUnit, setSelectedUnit] = useState(studio?.studioNumbers?.[0] || null);
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
@@ -251,14 +258,14 @@ const BookingModal = ({ studio, isOpen, onClose }) => {
     const [loading, setLoading] = useState(false);
     const [showUnitDropdown, setShowUnitDropdown] = useState(false);
 
-    // Generate next 30 days for the Date Strip
+    // Generate next 30 days for the Date Strip (Local Time)
     const dates = [];
     const today = new Date();
     for (let i = 0; i < 30; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() + i);
         dates.push({
-            fullDate: d.toISOString().split('T')[0],
+            fullDate: getLocalDateString(d),
             dayName: d.toLocaleDateString('en-US', { weekday: 'short' }), // Mon, Tue
             dayNumber: d.getDate(), // 18, 19
             month: d.toLocaleDateString('en-US', { month: 'short' }), // Nov, Dec
@@ -274,11 +281,38 @@ const BookingModal = ({ studio, isOpen, onClose }) => {
 
     useEffect(() => {
         if (!isOpen) return;
-        // Reset state when modal opens
-        setDate(new Date().toISOString().split('T')[0]);
+
+        // 1. Set Date to Today (Local)
+        setDate(getLocalDateString(new Date()));
+
+        // 2. Set Unit
         setSelectedUnit(studio?.studioNumbers?.[0] || null);
-        setStartTime('');
-        setEndTime('');
+
+        // 3. Default Time: Current time rounded to next 5 minutes
+        const now = new Date();
+        const start = new Date(now);
+        const minutes = Math.ceil(now.getMinutes() / 5) * 5;
+        start.setMinutes(minutes);
+        start.setSeconds(0);
+
+        // If 'start' ended up in the past or immediately NOW, push it forward slightly
+        if (start <= now) {
+            start.setMinutes(start.getMinutes() + 5);
+        }
+
+        const startH = start.getHours().toString().padStart(2, '0');
+        const startM = start.getMinutes().toString().padStart(2, '0');
+        const defaultStart = `${startH}:${startM}`;
+
+        // 4. Default End Time: Start + 50 minutes
+        const end = new Date(start.getTime() + 50 * 60000);
+        const endH = end.getHours().toString().padStart(2, '0');
+        const endM = end.getMinutes().toString().padStart(2, '0');
+        const defaultEnd = `${endH}:${endM}`;
+
+        // Set state immediately
+        setStartTime(defaultStart);
+        setEndTime(defaultEnd);
     }, [isOpen, studio]);
 
     useEffect(() => {
@@ -373,19 +407,19 @@ const BookingModal = ({ studio, isOpen, onClose }) => {
         setEndTime(endStr);
     };
 
-    if (!isOpen) return null;
+
 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/90 backdrop-blur-md">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0"
-                        onClick={onClose}
-                    />
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 dark:bg-black/90 backdrop-blur-sm"
+                    onClick={onClose}
+                >
                     <motion.div
                         initial={{ scale: 0.95, opacity: 0, y: 30 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -512,7 +546,7 @@ const BookingModal = ({ studio, isOpen, onClose }) => {
                                         <TimePicker
                                             label="Start Time"
                                             value={startTime}
-                                            minTime={new Date().toISOString().split('T')[0] === date ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : undefined}
+                                            minTime={getLocalDateString(new Date()) === date ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : undefined}
                                             onChange={(val) => {
                                                 setStartTime(val);
                                                 // Auto-advance end time if not set or invalid
@@ -641,7 +675,7 @@ const BookingModal = ({ studio, isOpen, onClose }) => {
                             </button>
                         </div>
                     </motion.div>
-                </div>
+                </motion.div>
             )}
         </AnimatePresence>
     );

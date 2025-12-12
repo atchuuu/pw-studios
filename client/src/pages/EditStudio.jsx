@@ -14,6 +14,7 @@ const EditStudio = () => {
     const [uploading, setUploading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
+        description: '',
         address: '',
         city: '',
         area: '',
@@ -38,6 +39,7 @@ const EditStudio = () => {
                 const { data } = await axios.get(`${API_BASE_URL}/studios/${id}`, config);
                 setFormData({
                     name: data.name || '',
+                    description: data.description || '',
                     address: data.address || '',
                     city: data.city || '',
                     area: data.area || '',
@@ -171,6 +173,18 @@ const EditStudio = () => {
                                     onChange={handleChange}
                                     className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all"
                                     required
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label htmlFor="studio-description" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                                <textarea
+                                    id="studio-description"
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows="3"
+                                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all"
+                                    placeholder="Enter studio description..."
                                 />
                             </div>
                             <div>
